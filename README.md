@@ -59,7 +59,7 @@ SaveMate incorpora un sistema de **IA predictiva** que aprende de los hábitos d
 - 📱 **Alertas personalizadas:** Recomienda ahorrar **antes de gastar**.
 
 👉 Ejemplo de notificación:
-> “Hoy martes sueles gastar en 🚕 Uber y 🍫 snacks. ¿Quieres apartar $5.000 antes de que ocurra el gasto?”
+> “Los martes sueles gastar en Uber y snacks. ¿Quieres ahorrar $5.000 antes de que ocurra el gasto?”
 
 ---
 
