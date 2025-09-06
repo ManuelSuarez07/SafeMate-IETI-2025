@@ -1,158 +1,187 @@
 # 💰 SaveMate – Tu asistente de ahorro inteligente
 
-**SaveMate** es una **aplicación móvil (Android/iOS)** diseñada para ayudar a las personas a **ahorrar dinero de manera automática e inteligente**.  
-Su finalidad es transformar los **gastos diarios pequeños** (☕ cafés, 🍫 snacks, 🚕 transporte) en **ahorro real** mediante redondeo automático, control de gastos y **predicciones con Inteligencia Artificial** que anticipan tus consumos más probables.
+**SaveMate** es una **app móvil (Android/iOS)** que transforma los **gastos diarios pequeños** (☕ cafés, 🍫 snacks, 🚌 transporte) en **ahorro automático** mediante redondeo o porcentaje configurable.
+
+La app detecta las transacciones a partir de **notificaciones y SMS bancarios**, procesa el redondeo o porcentaje definido, y realiza un **cobro automático** a la cuenta de origen para apartar el ahorro en una **alcancía digital dentro de SaveMate**.
+
+Además, incorpora **IA generativa** que predice gastos probables y sugiere configuraciones óptimas para que el usuario alcance sus metas más rápido.
 
 ---
 
 ## 🔎 Problema identificado
-Muchas personas no logran ahorrar porque:
-- ❌ No llevan control de los **gastos pequeños**.
-- ❌ El dinero “desaparece” al final del mes sin saber en qué se fue.
-- ❌ No tienen **hábitos financieros consistentes**.
+- ❌ Los usuarios no logran ahorrar porque no llevan control de los **gastos pequeños**.
+- ❌ El dinero “desaparece” al final del mes sin claridad en qué se gastó.
+- ❌ Ahorrar manualmente requiere disciplina y constancia, algo difícil de mantener.
 
 ---
 
-## 💡 Solución propuesta
-SaveMate ofrece:
-- 🔗 Conexión con **billeteras digitales o bancos**.
-- 💵 **Redondeo automático** en cada compra y registro como ahorro.
-- 👥 Gestión de **usuarios**.
-- 🧾 Registro de **transacciones** (gastos/ingresos).
-- 🎯 Creación y seguimiento de **metas de ahorro**.
-- 🤖 **IA predictiva** que anticipa en qué podrías gastar hoy o esta semana.
+## 💡 Propuesta de valor
+- 💵 **Ahorro automático inteligente**, ligado directamente al consumo real ⚡ *(MVP)*
+- 🎯 **Metas personalizadas**, que el usuario puede definir ⚡ *(MVP)*
+- 🤖 **IA predictiva y generativa** para anticipar gastos y recomendar ajustes ⚡ *(MVP)*
+- 👥 **Metas colaborativas** (futuro)
+- 🎮 **Gamificación y logros** (futuro)
+- 📚 **Educación financiera ligera** (futuro)
 
 ---
 
-## ⚙️ Mecánica de redondeo automático
-El funcionamiento de SaveMate se basa en **redondear los pagos realizados** para destinar la diferencia a un fondo de ahorro.
+## ⚙️ Mecánica de funcionamiento
 
-📌 **Ejemplo práctico**
-- Pago realizado: **$15.200**
-- Redondeo al múltiplo superior: **$16.000**
-- Ahorro generado: **$800**
+1. **Detección de transacción** ⚡ *(MVP)*
+2. **Cálculo del ahorro** ⚡ *(MVP)*
+3. **Cobro automático** ⚡ *(MVP)*
+4. **Escenarios de saldo insuficiente** ⚡ *(MVP)*
+    - Opción A: No se ahorra
+    - Opción B: Se registra como pendiente y se descuenta en la próxima recarga
+    - Opción C: Respeta el saldo mínimo seguro definido por el usuario
+5. **Visualización de ahorro y gastos** ⚡ *(MVP)*
+6. **IA predictiva y generativa** ⚡ *(MVP)*
 
-El excedente ($800) se registra como **ahorro en la app** y, en integración futura con APIs bancarias (Nequi, Daviplata), se transferirá automáticamente a la billetera o cuenta vinculada.
-
----
-
-## 🔄 Manejo en caso de saldo insuficiente
-El usuario podrá elegir entre tres opciones:
-
-1. **Opción A – No realizar el ahorro:**  
-   La transacción se ejecuta normalmente, pero sin apartar dinero.
-
-2. **Opción B – Ahorro pendiente:**  
-   El sistema lo registra como “pendiente” y lo descuenta en la **próxima recarga**.
-
-3. **Opción C – Saldo mínimo seguro:**  
-   El usuario define un **mínimo de saldo** (ej: $10.000). Si el redondeo baja de ese mínimo, no se ejecuta.
+📌 **Ejemplo práctico de redondeo**
+- Pago realizado: $15.200
+- Redondeo al múltiplo superior: $16.000
+- Ahorro generado: $800
 
 ---
 
-## 🧠 Inteligencia Artificial integrada
-
-SaveMate incorpora un sistema de **IA predictiva** que aprende de los hábitos de consumo de cada usuario para **anticipar en qué podría gastar**.
-
-- 🔮 **Predicciones diarias/semanales:** Basadas en historial, la app estima dónde es más probable que gastes (ej: Uber, cafés, snacks).
-- 📊 **Análisis de patrones:** Detecta gastos frecuentes según día y hora.
-- 📱 **Alertas personalizadas:** Recomienda ahorrar **antes de gastar**.
-
-👉 Ejemplo de notificación:
-> “Los martes sueles gastar en Uber y snacks. ¿Quieres ahorrar $5.000 antes de que ocurra el gasto?”
+## 💰 Modelo de monetización
+- Comisión del **2.5% del total ahorrado al final de cada mes** ⚡ *(MVP)*
+- Ejemplo: Si un usuario ahorra $200.000, SaveMate cobra $5.000
 
 ---
 
-## 🆓💎 Versiones del producto
+## 🆕 Funcionalidades destacadas
 
-### 🆓 Versión Gratuita
-- Registro de **gastos e ingresos**.
-- **Filtros de transacciones** por día, semana, mes, trimestre, semestre y año.
-- Ahorro mediante redondeo, pero limitado a **20 transacciones al mes**.
+### ⚡ MVP – Primera versión
+- Ahorro automático (redondeo o porcentaje)
+- Manejo de saldo insuficiente (opciones A, B, C)
+- IA predictiva y generativa
+- Visualización de gastos y ahorro acumulado
+- Monetización por comisión mensual
 
-### 💎 Versión Paga
-Incluye todas las funciones de la versión Free más:
-- 💵 **Ahorro automático ilimitado** en cada transacción.
-- 🎯 **Metas de ahorro avanzadas**: varias metas simultáneas con distribución porcentual.
-- ⚙️ Opciones configurables de ahorro:
-    - Redondeo.
-    - % del valor de cada transacción.
-- 📊 **Reportes descargables en PDF/Excel** de gastos y ahorros.
-- 🤖 **Predicciones personalizadas mejoradas** con IA (más precisión y alertas inteligentes).
+### 🚀 Futuras mejoras
+- 🎮 Sistema de **recompensas y logros por ahorro**
+- 👥 Modo colaborativo: metas de ahorro en grupo
+- 📚 Educación financiera ligera automatizada
 
 ---
 
 ## 🏗️ Arquitectura del proyecto
-El proyecto está dividido en dos partes principales:
 
 ```
-/savemate-backend     -> API REST en Spring Boot (gestión de datos y lógica de negocio)
+/savemate-backend     -> API REST en Spring Boot (gestión de datos y lógica de negocio, MySQL)
 /savemate-mobile      -> App móvil Flutter (UI Android/iOS + integración con IA)
 ```
 
-### 📂 Estructura del backend
+### 📂 Estructura del backend (Java + Spring Boot)
+
 ```bash
-src/main/java/com/savemate/
+src/main/java/savemate/
 │
-├── config/                  # ⚙️ Configuración de seguridad
-│   └── SecurityConfig.java
+├── config/                  
+│   └── SecurityConfig.java ⚡                 # Configuración de seguridad y autenticación
 │
-├── controller/              # 🌐 Controladores REST (endpoints)
-│   ├── UserController.java
-│   ├── TransactionController.java
-│   └── SavingController.java
+├── controller/              
+│   ├── UserController.java ⚡                  # Endpoints de usuarios
+│   ├── TransactionController.java ⚡           # Endpoints de transacciones
+│   ├── SavingController.java ⚡                # Endpoints de metas de ahorro
+│   └── AIController.java ⚡                    # Endpoints de IA predictiva
 │
-├── dto/                     # 📦 Objetos de transferencia
-│   ├── UserDTO.java
-│   ├── TransactionDTO.java
-│   └── SavingDTO.java
+├── dto/                     
+│   ├── UserDTO.java ⚡
+│   ├── TransactionDTO.java ⚡
+│   ├── SavingDTO.java ⚡
+│   └── AIRecommendationDTO.java ⚡
 │
-├── exception/               # 🚨 Manejo de errores
-│   ├── GlobalExceptionHandler.java
-│   └── ResourceNotFoundException.java
+├── model/                   
+│   ├── User.java ⚡
+│   ├── Transaction.java ⚡
+│   ├── SavingGoal.java ⚡
+│   └── AIRecommendation.java ⚡
 │
-├── model/                   # 🗄️ Entidades JPA
-│   ├── User.java
-│   ├── Transaction.java
-│   └── SavingGoal.java
+├── repository/              
+│   ├── UserRepository.java ⚡
+│   ├── TransactionRepository.java ⚡
+│   └── SavingRepository.java ⚡
 │
-├── repository/              # 🛢️ Repositorios JPA
-│   ├── UserRepository.java
-│   ├── TransactionRepository.java
-│   └── SavingRepository.java
+├── service/                 
+│   ├── UserService.java ⚡
+│   ├── TransactionService.java ⚡
+│   ├── SavingService.java ⚡
+│   └── AIService.java ⚡
 │
-├── service/                 # 🧠 Lógica de negocio
-│   ├── UserService.java
-│   ├── TransactionService.java
-│   └── SavingService.java
+├── util/                    
+│   ├── RoundingUtils.java ⚡
+│   └── NotificationParserUtils.java ⚡
 │
-├── util/                    # 🛠️ Utilidades
-│   ├── DateUtils.java
-│   ├── RoundingUtils.java
-│   └── ReportGeneratorUtils.java   # 📊 Exportación PDF/Excel (versión Pro)
+└── SaveMateApplication.java ⚡                 # Clase principal
+
+src/main/resources/
 │
-└── SaveMateApplication.java # 🚀 Clase principal
+├── application.properties ⚡                   # Configuración de MySQL y Spring Boot
+├── logback-spring.xml                          # Configuración de logs
+└── otros archivos de configuración...
+```
+
+### 📱 App móvil (Flutter)
+
+```bash
+lib/
+│
+├── main.dart ⚡
+├── screens/
+│   ├── login_screen.dart ⚡
+│   ├── home_screen.dart ⚡
+│   ├── transactions_screen.dart ⚡
+│   ├── savings_screen.dart ⚡
+│   └── ai_recommendations.dart ⚡
+│
+├── widgets/
+│   ├── transaction_card.dart ⚡
+│   ├── saving_goal_card.dart ⚡
+│   └── ai_tip_card.dart ⚡
+│
+├── services/
+│   ├── api_service.dart ⚡
+│   ├── notification_service.dart ⚡
+│   └── ai_service.dart ⚡
+│
+└── models/
+    ├── user.dart ⚡
+    ├── transaction.dart ⚡
+    ├── saving.dart ⚡
+    └── ai_recommendation.dart ⚡
+```
+
+---
+
+## 📊 Diagrama de flujo simplificado
+
+```mermaid
+flowchart TD
+    A[Compra detectada por notificación/SMS] --> B[App móvil procesa notificación]
+    B --> C[App envía transacción al backend]
+    C --> D[Backend calcula ahorro y registra en BD]
+    D --> E[Cobro automático a cuenta vinculada]
+    E --> F[Ahorro registrado en SaveMate]
+    F --> G[Usuario visualiza en la app: ahorro + predicciones IA]
 ```
 
 ---
 
 ## 🛠️ Tecnologías utilizadas
+
 ### Backend
 - ☕ Java 17
 - 🌱 Spring Boot 3
 - 🗂️ Spring Data JPA
 - 🔐 Spring Security
 - 🛢️ MySQL
-- 📦 Maven
-- ☁️ AWS *(futuro despliegue)*
 
 ### Móvil
 - 📱 Flutter (Android/iOS)
 - 🤖 TensorFlow Lite *(IA en dispositivo)*
 - 🔗 HTTP/Dio *(consumo de API REST)*
-
-### Visualización futura
-- 📊 Power BI / Grafana
 
 ---
 
@@ -161,22 +190,6 @@ src/main/java/com/savemate/
 ### 📥 Clonar repositorio
 ```bash
 git clone https://github.com/tuusuario/savemate.git
-```
-
-### 🛢️ Configurar base de datos
-```bash
-CREATE DATABASE savemate_db;
-```
-
-### ⚙️ Configurar `application.properties`
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/savemate_db
-spring.datasource.username=tu_usuario
-spring.datasource.password=tu_password
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
-server.port=8080
 ```
 
 ### ▶️ Ejecutar el backend
@@ -197,24 +210,16 @@ flutter run
 ## 📡 Endpoints principales
 
 ### 👥 Usuarios
-* `POST /api/users` → Crear usuario
-* `GET /api/users/{id}` → Obtener usuario por ID
+- `POST /api/users` → Crear usuario
+- `GET /api/users/{id}` → Obtener usuario por ID
 
 ### 🧾 Transacciones
-* `POST /api/transactions` → Registrar gasto/ingreso
-* `GET /api/transactions/user/{id}` → Listar transacciones de un usuario
+- `POST /api/transactions` → Registrar gasto/ingreso
+- `GET /api/transactions/user/{id}` → Listar transacciones de un usuario
 
 ### 🎯 Metas de ahorro
-* `POST /api/savings` → Crear meta de ahorro
-* `GET /api/savings/user/{id}` → Listar metas de un usuario
-
----
-
-## 🚀 Futuras mejoras
-- 🔗 Integración directa con **APIs bancarias reales**.
-- 📱 **Notificaciones push** en la app móvil.
-- 🏅 Sistema de **recompensas por ahorro**.
-- 🤝 Modo colaborativo: metas de ahorro en grupo.
+- `POST /api/savings` → Crear meta de ahorro
+- `GET /api/savings/user/{id}` → Listar metas de un usuario
 
 ---
 
