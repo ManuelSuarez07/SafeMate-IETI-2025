@@ -76,7 +76,7 @@ Además, incorpora **IA generativa** que predice gastos probables y sugiere conf
 ### 📂 Estructura del backend (Java + Spring Boot)
 
 ```bash
-src/main/java/savemate/
+src/main/java/safemate/
 │
 ├── config/                  
 │   └── SecurityConfig.java ⚡                 # Configuración de seguridad y autenticación
@@ -102,7 +102,8 @@ src/main/java/savemate/
 ├── repository/              
 │   ├── UserRepository.java ⚡
 │   ├── TransactionRepository.java ⚡
-│   └── SavingRepository.java ⚡
+│   ├── SavingRepository.java ⚡
+│   └── AIRecommendationRepository.java ⚡      # Repositorio para recomendaciones de IA
 │
 ├── service/                 
 │   ├── UserService.java ⚡
@@ -119,7 +120,7 @@ src/main/java/savemate/
 src/main/resources/
 │
 ├── application.properties ⚡                   # Configuración de MySQL y Spring Boot
-├── logback-spring.xml                          # Configuración de logs
+├── logback-spring.xml ⚡                       # Configuración de logs
 └── otros archivos de configuración...
 ```
 
