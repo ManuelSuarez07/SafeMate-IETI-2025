@@ -1,8 +1,8 @@
-﻿package safemate.dto;
+package safemate.dto;
 
-/**
- * Objeto de transferencia de datos para User.
- */
 public class UserDTO {
-
+    public Long id;
+    public String name;
+    public String email;
+    // no password aquí
 }

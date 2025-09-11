@@ -1,8 +1,9 @@
-﻿package safemate.dto;
+package safemate.dto;
 
-/**
- * Objeto de transferencia de datos para SavingGoal.
- */
 public class SavingDTO {
-
+    public Long id;
+    public Long userId;
+    public String title;
+    public Long targetAmountCents;
+    public Long currentAmountCents;
 }

@@ -1,8 +1,14 @@
-﻿package safemate;
+package safemate;
 
 /**
- * Clase principal que arranca la aplicación Spring Boot.
+ * Clase principal que arranca la aplicacion Spring Boot.
  */
-public class SaveMateApplication {
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
+public class SaveMateApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(SaveMateApplication.class, args);
+    }
 }
