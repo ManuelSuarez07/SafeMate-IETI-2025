@@ -11,12 +11,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() // Desactiva CSRF para pruebas con Postman/Flutter
+                .csrf(csrf -> csrf.disable()) // Nueva forma sin deprecación
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll() //Permite todos los endpoints del backend
+                        .requestMatchers("/api/**").permitAll() // Permite todos los endpoints del backend
                         .anyRequest().authenticated()
                 )
-                .httpBasic(); // Autenticación básica
+                .httpBasic(httpBasic -> {}); // Nueva forma sin deprecación
 
         return http.build();
     }
