@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import safemate.model.User;
-import safemate.repository.UserRepository;
+import savemate.model.User;
+import savemate.repository.UserRepository;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package safemate.model;
+package savemate.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -12,23 +12,27 @@ public class User {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 100)
-    private String username;   // 👈 obligatorio en la BD
+    private String username;
 
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
     @Column(nullable = false, length = 255)
-    private String password;   // 👈 obligatorio en la BD
+    private String password;
 
-    @Column(name = "created_at", nullable = false,
-            columnDefinition = "DATETIME(6) DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     @Column(length = 255)
-    private String name;       // opcional
+    private String name;
 
     @Column(name = "password_hash", length = 255)
-    private String passwordHash; // opcional
+    private String passwordHash;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     // Getters y Setters
     public Long getId() { return id; }
@@ -52,3 +56,4 @@ public class User {
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 }
+

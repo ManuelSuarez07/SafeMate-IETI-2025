@@ -1,4 +1,4 @@
-package safemate;
+package savemate;
 
 /**
  * Clase principal que arranca la aplicacion Spring Boot.
