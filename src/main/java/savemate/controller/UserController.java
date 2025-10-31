@@ -1,9 +1,10 @@
-package safemate.controller;
+package savemate.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import safemate.model.User;
-import safemate.service.UserService;
+import savemate.model.User;
+import savemate.service.UserService;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,4 +24,28 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping
+    public ResponseEntity<List<User>> getAll() {
+        List<User> users = userService.findAll();
+        return ResponseEntity.ok(users);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        if (userService.deleteById(id)) {
+            return ResponseEntity.noContent().build(); // 204 OK sin cuerpo
+        } else {
+            return ResponseEntity.notFound().build(); // 404 si no existe
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User updatedUser) {
+        return userService.updateUser(id, updatedUser)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
 }

@@ -1,4 +1,4 @@
-package safemate.config;
+package savemate.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,12 +11,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Nueva forma sin deprecación
+                .csrf(csrf -> csrf.disable()) // Desactiva CSRF para Postman
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll() // Permite todos los endpoints del backend
-                        .anyRequest().authenticated()
-                )
-                .httpBasic(httpBasic -> {}); // Nueva forma sin deprecación
+                        .anyRequest().permitAll() // 👈 Permite TODO el tráfico
+                );
 
         return http.build();
     }
