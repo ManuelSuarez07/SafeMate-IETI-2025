@@ -29,6 +29,9 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserService userService;
 
+    // ------------------------------------
+    //              LOGIN
+    // ------------------------------------
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         log.info("Intento de login para el email: {}", loginRequest.getEmail());
@@ -79,6 +82,10 @@ public class AuthController {
         public void setPassword(String password) { this.password = password; }
     }
 
+
+    // ------------------------------------
+    //              REGISTER
+    // ------------------------------------
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
         log.info("Intento de registro para el email: {}", userDTO.getEmail());
@@ -89,8 +96,10 @@ public class AuthController {
                         .body(Map.of("error", "El email ya está registrado"));
             }
 
-            UserDTO createdUser = userService.createUser(userDTO, userDTO.getPassword());
+            // 🔥 Crear el usuario (aquí ya encripta la contraseña internamente)
+            UserDTO createdUser = userService.createUser(userDTO);
 
+            // 🔥 Autologin después de registrar
             UserDetails userDetails = userDetailsService.loadUserByUsername(userDTO.getEmail());
             String accessToken = jwtService.generateToken(userDetails);
             String refreshToken = jwtService.generateRefreshToken(userDetails);
@@ -109,22 +118,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", e.getMessage()));
         }
-    }
-
-
-
-    // DTO para registro
-    public static class RegisterRequest {
-        private String name;
-        private String email;
-        private String password;
-
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
     }
 
 }

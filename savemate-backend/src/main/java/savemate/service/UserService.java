@@ -23,34 +23,45 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserDTO createUser(UserDTO userDTO, String rawPassword) {
+    public UserDTO createUser(UserDTO userDTO) {
         log.info("Creando nuevo usuario con email: {}", userDTO.getEmail());
 
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        if (userDTO.getUsername() == null || userDTO.getUsername().isEmpty()) {
+        if (userDTO.getUsername() == null || userDTO.getUsername().trim().isEmpty()) {
             throw new RuntimeException("El nombre de usuario es obligatorio");
+        }
+
+        if (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("La contraseña es obligatoria");
         }
 
         User user = new User();
         user.setEmail(userDTO.getEmail());
         user.setUsername(userDTO.getUsername());
-        user.setPassword(passwordEncoder.encode(rawPassword));
+
+        // ✅ Encriptar contraseña correctamente
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setPhoneNumber(userDTO.getPhoneNumber());
 
-        // Configuración de ahorro (si no viene, usa valores por defecto del modelo)
+        // Configuraciones de ahorro (si no vienen, usa las del modelo User)
         if (userDTO.getSavingType() != null)
             user.setSavingType(userDTO.getSavingType());
+
         if (userDTO.getRoundingMultiple() != null)
             user.setRoundingMultiple(userDTO.getRoundingMultiple());
+
         if (userDTO.getSavingPercentage() != null)
             user.setSavingPercentage(userDTO.getSavingPercentage());
+
         if (userDTO.getMinSafeBalance() != null)
             user.setMinSafeBalance(userDTO.getMinSafeBalance());
+
         if (userDTO.getInsufficientBalanceOption() != null)
             user.setInsufficientBalanceOption(userDTO.getInsufficientBalanceOption());
 
@@ -80,8 +91,10 @@ public class UserService {
 
         if (userDTO.getFirstName() != null)
             user.setFirstName(userDTO.getFirstName());
+
         if (userDTO.getLastName() != null)
             user.setLastName(userDTO.getLastName());
+
         if (userDTO.getPhoneNumber() != null)
             user.setPhoneNumber(userDTO.getPhoneNumber());
 
@@ -99,12 +112,16 @@ public class UserService {
 
         if (configDTO.getSavingType() != null)
             user.setSavingType(configDTO.getSavingType());
+
         if (configDTO.getRoundingMultiple() != null)
             user.setRoundingMultiple(configDTO.getRoundingMultiple());
+
         if (configDTO.getSavingPercentage() != null)
             user.setSavingPercentage(configDTO.getSavingPercentage());
+
         if (configDTO.getMinSafeBalance() != null)
             user.setMinSafeBalance(configDTO.getMinSafeBalance());
+
         if (configDTO.getInsufficientBalanceOption() != null)
             user.setInsufficientBalanceOption(configDTO.getInsufficientBalanceOption());
 

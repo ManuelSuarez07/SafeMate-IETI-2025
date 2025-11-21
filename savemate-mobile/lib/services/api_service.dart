@@ -98,14 +98,21 @@ class ApiService with ChangeNotifier {
   // Métodos de usuarios
   Future<User> createUser(User user, String password) async {
     try {
-      final response = await _dio.post('/users', data: {
-        ...user.toJson(),
-        'password': password,
-      });
+      // PASO 1: Obtener el mapa del usuario
+      // Si usas el toJson generado, asegúrate de que user.g.dart esté actualizado.
+      // Si no estás seguro, el manual de abajo es más seguro.
+      final Map<String, dynamic> userMap = user.toJson();
+
+      // PASO 2: Insertar la contraseña en el MISMO nivel (Flat JSON)
+      userMap['password'] = password;
+
+      // PASO 3: Enviar el mapa plano
+      // ANTES ENVIABAS: data: { "user": user.toJson(), "password": password } (ESTO ESTABA MAL)
+      final response = await _dio.post('/users', data: userMap);
 
       final createdUser = User.fromJson(response.data);
       _currentUser = createdUser;
-      
+
       notifyListeners();
       return createdUser;
     } on DioException catch (e) {
@@ -113,6 +120,8 @@ class ApiService with ChangeNotifier {
       throw _handleError(e);
     }
   }
+
+
 
   Future<User> getUserById(int id) async {
     try {

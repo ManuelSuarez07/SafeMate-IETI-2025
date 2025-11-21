@@ -2,8 +2,8 @@ package savemate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import savemate.dto.UserDTO;
 import savemate.service.UserService;
@@ -12,32 +12,27 @@ import savemate.service.UserService;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // Permitir peticiones desde Flutter
 public class UserController {
 
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserDTO> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
+        log.info("Intento de registro recibido: {}", userDTO); // LOG IMPORTANTE PARA DEPURAR
+
         try {
-            UserDTO created = userService.createUser(
-                    request.getUser(),
-                    request.getPassword()
-            );
+            // Validación básica antes de llamar al servicio
+            if (userDTO.getEmail() == null || userDTO.getPassword() == null) {
+                return ResponseEntity.badRequest().body("Email y contraseña son obligatorios");
+            }
+
+            UserDTO created = userService.createUser(userDTO);
             return new ResponseEntity<>(created, HttpStatus.CREATED);
-        } catch (RuntimeException e){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
+        } catch (RuntimeException e) {
+            log.error("Error al registrar usuario: ", e);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-    }
-
-    public static class RegisterRequest {
-        private UserDTO user;
-        private String password;
-
-        public UserDTO getUser() { return user; }
-        public void setUser(UserDTO user) { this.user = user; }
-
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
     }
 }

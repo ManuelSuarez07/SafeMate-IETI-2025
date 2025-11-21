@@ -57,6 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final authService = Provider.of<AuthService>(context, listen: false);
     
     final user = User(
+      username: _emailController.text.trim().split('@')[0],
       email: _emailController.text.trim(),
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),

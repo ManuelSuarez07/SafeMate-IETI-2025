@@ -5,6 +5,7 @@ part 'user.g.dart';
 @JsonSerializable()
 class User {
   final int? id;
+  final String username;
   final String email;
   final String firstName;
   final String lastName;
@@ -23,6 +24,7 @@ class User {
 
   User({
     this.id,
+    required this.username,
     required this.email,
     required this.firstName,
     required this.lastName,
@@ -40,10 +42,45 @@ class User {
     this.updatedAt,
   });
 
-
-
+  // GENERADO AUTOMÁTICAMENTE (Requiere build_runner)
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
-  Map<String, dynamic> toJson() => _$UserToJson(this);
+
+  // MANUAL: Para asegurar compatibilidad total con Spring Boot UserDTO
+  Map<String, dynamic> toJson() {
+    return {
+      if (id != null) 'id': id,
+      'username': username,
+      'email': email,
+      'firstName': firstName,      // Clave exacta para Java
+      'lastName': lastName,        // Clave exacta para Java
+      'phoneNumber': phoneNumber,
+      'bankAccount': bankAccount,
+      'bankName': bankName,
+      // Enums a String MAYÚSCULAS
+      'savingType': savingType == SavingType.rounding ? 'ROUNDING' : 'PERCENTAGE',
+      'roundingMultiple': roundingMultiple,
+      'savingPercentage': savingPercentage,
+      'minSafeBalance': minSafeBalance,
+      'insufficientBalanceOption': _getInsufficientBalanceOptionString(),
+      'totalSaved': totalSaved,
+      'monthlyFeeRate': monthlyFeeRate,
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+    };
+  }
+
+  String _getInsufficientBalanceOptionString() {
+    switch (insufficientBalanceOption) {
+      case InsufficientBalanceOption.noSaving:
+        return 'NO_SAVING';
+      case InsufficientBalanceOption.pending:
+        return 'PENDING';
+      case InsufficientBalanceOption.respectMinBalance:
+        return 'RESPECT_MIN_BALANCE';
+    }
+  }
+
+  // --- Getters para la UI ---
 
   String get fullName => '$firstName $lastName';
 
@@ -72,8 +109,6 @@ class User {
   }
 }
 
-
-
 enum SavingType {
   @JsonValue('ROUNDING')
   rounding,
@@ -89,4 +124,3 @@ enum InsufficientBalanceOption {
   @JsonValue('RESPECT_MIN_BALANCE')
   respectMinBalance,
 }
-

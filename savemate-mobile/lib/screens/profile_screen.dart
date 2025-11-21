@@ -60,13 +60,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     final authService = Provider.of<AuthService>(context, listen: false);
-    
+
     final updatedUser = User(
+      username: authService.user!.username, // <-- AGREGADO
       email: authService.user!.email,
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
-      phoneNumber: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+      phoneNumber: _phoneController.text.trim().isEmpty
+          ? null
+          : _phoneController.text.trim(),
+      bankAccount: authService.user!.bankAccount,
+      bankName: authService.user!.bankName,
+      savingType: authService.user!.savingType,
+      roundingMultiple: authService.user!.roundingMultiple,
+      savingPercentage: authService.user!.savingPercentage,
+      minSafeBalance: authService.user!.minSafeBalance,
+      insufficientBalanceOption: authService.user!.insufficientBalanceOption,
+      totalSaved: authService.user!.totalSaved,
+      monthlyFeeRate: authService.user!.monthlyFeeRate,
     );
+
 
     final success = await authService.updateProfile(updatedUser);
 
