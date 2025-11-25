@@ -1,0 +1,86 @@
+name: savemate
+description: Tu asistente de ahorro inteligente
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.2
+  google_fonts: ^6.1.0
+
+  # State Management
+  provider: ^6.1.1
+
+  # HTTP
+  dio: ^5.3.2
+  http: ^1.1.0
+
+  # Local Storage
+  shared_preferences: ^2.2.2
+
+  # JSON (Annotations usadas para generar .g.dart)
+  json_annotation: ^4.9.0
+
+  # Security
+  crypto: ^3.0.3
+
+  # Notifications
+  flutter_local_notifications: ^17.0.0
+
+  # Permissions
+  permission_handler: ^11.1.0
+
+  # SMS Reading
+  sms_reader: ^0.1.2
+
+  # Charts
+  fl_chart: ^0.65.0
+
+  # Animations
+  lottie: ^2.7.0
+
+  # Utils
+  intl: ^0.18.1
+  logger: ^2.0.2+1
+
+  # SMS
+  telephony:
+    path: ./telephony
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: ^2.10.1
+  json_serializable: ^6.11.1
+
+  # Linting
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/animations/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+
