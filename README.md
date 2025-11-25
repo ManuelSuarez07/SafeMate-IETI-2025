@@ -1,52 +1,60 @@
 # 💰 SaveMate – Tu asistente de ahorro inteligente
 
-**SaveMate** es una **app móvil (Android/iOS)** que transforma los **gastos diarios pequeños** (☕ cafés, 🍫 snacks, 🚌 transporte) en **ahorro automático** mediante redondeo o porcentaje configurable.
+SaveMate es una app móvil (Android/iOS) que transforma los gastos diarios pequeños (☕ cafés, 🍫 snacks, 🚌 transporte) en ahorro automático mediante redondeo o porcentaje configurable.
 
-La app detecta las transacciones a partir de **notificaciones y SMS bancarios**, procesa el redondeo o porcentaje definido, y realiza un **cobro automático** a la cuenta de origen para apartar el ahorro en una **alcancía digital dentro de SaveMate**.
+La app detecta las transacciones a partir de notificaciones y SMS bancarios, procesa el redondeo o porcentaje definido y realiza un cobro automático a la cuenta de origen para apartar el ahorro en una alcancía digital dentro de SaveMate.
 
-Además, incorpora **IA generativa** que predice gastos probables y sugiere configuraciones óptimas para que el usuario alcance sus metas más rápido.
+Además, incorpora IA generativa que predice gastos probables y sugiere configuraciones óptimas para que el usuario alcance sus metas más rápido.
 
 ---
 
 ## 🔎 Problema identificado
-- ❌ Los usuarios no logran ahorrar porque no llevan control de los **gastos pequeños**.
-- ❌ El dinero “desaparece” al final del mes sin claridad en qué se gastó.
-- ❌ Ahorrar manualmente requiere disciplina y constancia, algo difícil de mantener.
+
+❌ Los usuarios no logran ahorrar porque no llevan control de los gastos pequeños.  
+❌ El dinero “desaparece” al final del mes sin claridad en qué se gastó.  
+❌ Ahorrar manualmente requiere disciplina y constancia, algo difícil de mantener.
 
 ---
 
 ## 💡 Propuesta de valor
-- 💵 **Ahorro automático inteligente**, ligado directamente al consumo real ⚡ *(MVP)*
-- 🎯 **Metas personalizadas**, que el usuario puede definir ⚡ *(MVP)*
-- 🤖 **IA predictiva y generativa** para anticipar gastos y recomendar ajustes ⚡ *(MVP)*
-- 👥 **Metas colaborativas** (futuro)
-- 🎮 **Gamificación y logros** (futuro)
-- 📚 **Educación financiera ligera** (futuro)
+
+- 💵 Ahorro automático inteligente, ligado directamente al consumo real ⚡ (MVP)
+- 🎯 Metas personalizadas ⚡ (MVP)
+- 🤖 IA predictiva y generativa para anticipar gastos y recomendar ajustes ⚡ (MVP)
+- 👥 Metas colaborativas (futuro)
+- 🎮 Gamificación y logros (futuro)
+- 📚 Educación financiera ligera (futuro)
 
 ---
 
 ## ⚙️ Mecánica de funcionamiento
 
-1. **Detección de transacción** ⚡ *(MVP)*
-2. **Cálculo del ahorro** ⚡ *(MVP)*
-3. **Cobro automático** ⚡ *(MVP)*
-4. **Escenarios de saldo insuficiente** ⚡ *(MVP)*
-    - Opción A: No se ahorra
-    - Opción B: Se registra como pendiente y se descuenta en la próxima recarga
-    - Opción C: Respeta el saldo mínimo seguro definido por el usuario
-5. **Visualización de ahorro y gastos** ⚡ *(MVP)*
-6. **IA predictiva y generativa** ⚡ *(MVP)*
+- **Detección de transacción** ⚡ (MVP)  
+- **Cálculo del ahorro** ⚡ (MVP)  
+- **Cobro automático** ⚡ (MVP)
+- **Escenarios de saldo insuficiente** ⚡ (MVP)
+  - Opción A: No se ahorra  
+  - Opción B: Se registra como pendiente  
+  - Opción C: Respeta saldo mínimo seguro
 
-📌 **Ejemplo práctico de redondeo**
-- Pago realizado: $15.200
-- Redondeo al múltiplo superior: $16.000
-- Ahorro generado: $800
+- **Visualización de ahorro y gastos** ⚡ (MVP)  
+- **IA predictiva y generativa** ⚡ (MVP)
+
+---
+
+## 📌 Ejemplo práctico de redondeo
+
+- **Pago realizado:** $15.200  
+- **Redondeo al múltiplo superior:** $16.000  
+- **Ahorro generado:** $800  
 
 ---
 
 ## 💰 Modelo de monetización
-- Comisión del **2.5% del total ahorrado al final de cada mes** ⚡ *(MVP)*
-- Ejemplo: Si un usuario ahorra $200.000, SaveMate cobra $5.000
+
+- Comisión del **2.5% del total ahorrado al final de cada mes** ⚡ (MVP)
+
+**Ejemplo:** Si un usuario ahorra $200.000 → SaveMate cobra $5.000
 
 ---
 
@@ -54,74 +62,83 @@ Además, incorpora **IA generativa** que predice gastos probables y sugiere conf
 
 ### ⚡ MVP – Primera versión
 - Ahorro automático (redondeo o porcentaje)
-- Manejo de saldo insuficiente (opciones A, B, C)
+- Manejo de saldo insuficiente
 - IA predictiva y generativa
 - Visualización de gastos y ahorro acumulado
 - Monetización por comisión mensual
 
 ### 🚀 Futuras mejoras
-- 🎮 Sistema de **recompensas y logros por ahorro**
-- 👥 Modo colaborativo: metas de ahorro en grupo
-- 📚 Educación financiera ligera automatizada
+- 🎮 Recompensas y logros
+- 👥 Metas colaborativas
+- 📚 Educación financiera automatizada
 
 ---
 
 ## 🏗️ Arquitectura del proyecto
 
 ```
-/savemate-backend     -> API REST en Spring Boot (gestión de datos y lógica de negocio, MySQL)
-/savemate-mobile      -> App móvil Flutter (UI Android/iOS + integración con IA)
+/savemate-backend      -> API REST en Spring Boot (gestión de datos, lógica de negocio y seguridad)
+/savemate-mobile       -> App móvil Flutter (UI Android/iOS + integración con Telephony e IA)
 ```
 
 ### 📂 Estructura del backend (Java + Spring Boot)
 
 ```bash
-src/main/java/safemate/
+src/main/java/savemate/
 │
 ├── config/                  
-│   └── SecurityConfig.java ⚡                 # Configuración de seguridad y autenticación
+│   ├── SecurityConfig.java ⚡            # Configuración de seguridad (WebSecurity)
+│   ├── JwtAuthenticationFilter.java ⚡   # Filtro para validar tokens JWT
+│   ├── JwtService.java ⚡                # Servicio de generación/validación de JWT
+│   ├── CustomUserDetailsService.java ⚡  # Carga de usuarios para Spring Security
+│   ├── WebConfig.java ⚡                 # Configuración CORS y MVC
+│   └── JpaConfig.java ⚡                 # Configuración JPA/Hibernate
 │
 ├── controller/              
-│   ├── UserController.java ⚡                  # Endpoints de usuarios
-│   ├── TransactionController.java ⚡           # Endpoints de transacciones
-│   ├── SavingController.java ⚡                # Endpoints de metas de ahorro
-│   └── AIController.java ⚡                    # Endpoints de IA predictiva
+│   ├── AuthController.java ⚡            # Login y Registro (JWT)
+│   ├── UserController.java ⚡            # Gestión de perfil de usuario
+│   ├── TransactionController.java ⚡     # Gestión de transacciones
+│   ├── SavingController.java ⚡          # Gestión de metas de ahorro
+│   ├── AIController.java ⚡              # Endpoints de IA (Recomendaciones)
+│   └── HealthController.java ⚡          # Check de estado del servicio
 │
 ├── dto/                     
 │   ├── UserDTO.java ⚡
 │   ├── TransactionDTO.java ⚡
+│   ├── TransactionSummaryDTO.java ⚡
 │   ├── SavingDTO.java ⚡
-│   └── AIRecommendationDTO.java ⚡
+│   ├── SavingSummaryDTO.java ⚡
+│   ├── AIRecommendationDTO.java ⚡
+│   └── AIRecommendationSummaryDTO.java ⚡
 │
 ├── model/                   
-│   ├── User.java ⚡
-│   ├── Transaction.java ⚡
-│   ├── SavingGoal.java ⚡
-│   └── AIRecommendation.java ⚡
+│   ├── User.java ⚡                      # Entidad Usuario
+│   ├── Transaction.java ⚡               # Entidad Transacción
+│   ├── SavingGoal.java ⚡                # Entidad Meta de Ahorro
+│   └── AIRecommendation.java ⚡          # Entidad Recomendación IA
 │
 ├── repository/              
 │   ├── UserRepository.java ⚡
 │   ├── TransactionRepository.java ⚡
 │   ├── SavingRepository.java ⚡
-│   └── AIRecommendationRepository.java ⚡      # Repositorio para recomendaciones de IA
+│   └── AIRecommendationRepository.java ⚡
 │
 ├── service/                 
 │   ├── UserService.java ⚡
 │   ├── TransactionService.java ⚡
 │   ├── SavingService.java ⚡
-│   └── AIService.java ⚡
+│   └── AIService.java ⚡                 # Lógica de negocio para IA
 │
 ├── util/                    
-│   ├── RoundingUtils.java ⚡
-│   └── NotificationParserUtils.java ⚡
+│   ├── RoundingUtils.java ⚡             # Lógica de redondeo
+│   └── NotificationParserUtils.java ⚡   # Parsing de SMS/Notificaciones
 │
-└── SaveMateApplication.java ⚡                 # Clase principal
+└── SaveMateApplication.java ⚡           # Clase principal (Main)
 
 src/main/resources/
 │
-├── application.properties ⚡                   # Configuración de MySQL y Spring Boot
-├── logback-spring.xml ⚡                       # Configuración de logs
-└── otros archivos de configuración...
+├── application.properties ⚡             # Configuración DB, JWT y Servidor
+└── logback-spring.xml ⚡                 # Configuración de Logging
 ```
 
 ### 📱 App móvil (Flutter)
@@ -129,29 +146,33 @@ src/main/resources/
 ```bash
 lib/
 │
-├── main.dart ⚡
+├── main.dart ⚡                          # Punto de entrada de la App
 ├── screens/
-│   ├── login_screen.dart ⚡
-│   ├── home_screen.dart ⚡
-│   ├── transactions_screen.dart ⚡
-│   ├── savings_screen.dart ⚡
-│   └── ai_recommendations.dart ⚡
+│   ├── login_screen.dart ⚡              # Pantalla de Inicio de Sesión
+│   ├── register_screen.dart ⚡           # Pantalla de Registro
+│   ├── home_screen.dart ⚡               # Dashboard principal
+│   ├── transactions_screen.dart ⚡       # Historial de transacciones
+│   ├── savings_screen.dart ⚡            # Gestión de metas de ahorro
+│   ├── profile_screen.dart ⚡            # Perfil de usuario
+│   └── ai_recommendations_screen.dart ⚡ # Pantalla de consejos de IA
 │
 ├── widgets/
-│   ├── transaction_card.dart ⚡
-│   ├── saving_goal_card.dart ⚡
-│   └── ai_tip_card.dart ⚡
+│   ├── transaction_card.dart ⚡          # Tarjeta de transacción
+│   ├── saving_goal_card.dart ⚡          # Tarjeta de meta de ahorro
+│   └── ai_tip_card.dart ⚡               # Tarjeta de consejo IA
 │
 ├── services/
-│   ├── api_service.dart ⚡
-│   ├── notification_service.dart ⚡
-│   └── ai_service.dart ⚡
+│   ├── api_service.dart ⚡               # Cliente HTTP base
+│   ├── auth_service.dart ⚡              # Servicio de autenticación
+│   └── notification_service.dart ⚡      # Gestión de notificaciones locales
 │
-└── models/
-    ├── user.dart ⚡
-    ├── transaction.dart ⚡
-    ├── saving.dart ⚡
-    └── ai_recommendation.dart ⚡
+├── models/
+│   ├── user.dart ⚡
+│   ├── transaction.dart ⚡
+│   ├── saving.dart ⚡
+│   └── ai_recommendation.dart ⚡
+│
+└── Telephony/                            # Módulo nativo personalizado (Android/iOS)
 ```
 
 ---
@@ -170,19 +191,20 @@ flowchart TD
 
 ---
 
-## 🛠️ Tecnologías utilizadas
+# 🛠️ Tecnologías utilizadas
 
-### Backend
-- ☕ Java 17
-- 🌱 Spring Boot 3
-- 🗂️ Spring Data JPA
-- 🔐 Spring Security
-- 🛢️ MySQL
+## Backend
+- ☕ **Java 17**
+- 🌱 **Spring Boot 3**
+- 🗂️ **Spring Data JPA**
+- 🔐 **Spring Security + JWT**
+- 🛢️ **MySQL / H2**
 
-### Móvil
-- 📱 Flutter (Android/iOS)
-- 🤖 TensorFlow Lite *(IA en dispositivo)*
-- 🔗 HTTP/Dio *(consumo de API REST)*
+## Móvil
+- 📱 **Flutter**
+- 🔌 **Dio / HTTP**
+- 💾 **SharedPreferences / Secure Storage**
+- 📨 **Telephony Plugin**
 
 ---
 
@@ -190,41 +212,49 @@ flowchart TD
 
 ### 📥 Clonar repositorio
 ```bash
-git clone https://github.com/tuusuario/savemate.git
+git clone https://github.com/manuelsuarez07/safemate-ieti-2025.git
 ```
 
 ### ▶️ Ejecutar el backend
 ```bash
-cd savemate-backend
+cd SafeMate-IETI-2025-2.2/savemate-backend
+mvn clean install
 mvn spring-boot:run
 ```
 
 ### ▶️ Ejecutar la app móvil
 ```bash
-cd savemate-mobile
+cd SafeMate-IETI-2025-2.2/savemate-mobile
 flutter pub get
 flutter run
 ```
 
 ---
 
-## 📡 Endpoints principales
+# 📡 Endpoints principales
 
-### 👥 Usuarios
-- `POST /api/users` → Crear usuario
-- `GET /api/users/{id}` → Obtener usuario por ID
+## 🔐 Autenticación
+- **POST /auth/register** → Registrar usuario  
+- **POST /auth/login** → Obtener token  
 
-### 🧾 Transacciones
-- `POST /api/transactions` → Registrar gasto/ingreso
-- `GET /api/transactions/user/{id}` → Listar transacciones de un usuario
+## 👥 Usuarios
+- **GET /api/users/me**
+- **PUT /api/users/{id}**
 
-### 🎯 Metas de ahorro
-- `POST /api/savings` → Crear meta de ahorro
-- `GET /api/savings/user/{id}` → Listar metas de un usuario
+## 🧾 Transacciones
+- **POST /api/transactions**
+- **GET /api/transactions/user/{userId}**
+
+## 🎯 Metas de ahorro
+- **POST /api/savings**
+- **GET /api/savings/user/{userId}**
+
+## 🤖 Inteligencia Artificial
+- **GET /api/ai/recommendations/user/{userId}**
 
 ---
 
-## 👨‍💻 Equipo
-- Manuel Suárez
-- Yeltzyn Sierra
-- Cristian Zeballos
+# 👨‍💻 Equipo
+- **Manuel Suárez**
+- **Yeltzyn Sierra**
+- **Cristian Zeballos**
