@@ -9,20 +9,20 @@ import 'screens/home_screen.dart';
 import 'services/api_service.dart';
 import 'services/notification_service.dart';
 import 'services/auth_service.dart';
-import 'models/user.dart';
+// import 'models/user.dart'; // No parece usarse aquí directamente
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Inicializar notificaciones
   await NotificationService.initialize(flutterLocalNotificationsPlugin);
-  
+
   // Inicializar SharedPreferences
   final prefs = await SharedPreferences.getInstance();
-  
+
   runApp(SaveMateApp(
     prefs: prefs,
   ));
@@ -30,7 +30,7 @@ void main() async {
 
 class SaveMateApp extends StatelessWidget {
   final SharedPreferences prefs;
-  
+
   const SaveMateApp({
     Key? key,
     required this.prefs,
@@ -40,9 +40,23 @@ class SaveMateApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // 1. Creamos el ApiService
         ChangeNotifierProvider(create: (_) => ApiService()),
+
+        // 2. Creamos el AuthService (que depende de ApiService)
         ChangeNotifierProvider(create: (context) => AuthService(prefs, Provider.of<ApiService>(context, listen: false))),
-        ChangeNotifierProvider(create: (_) => NotificationService()),
+
+        // 3. [MODIFICADO] Usamos ProxyProvider para inyectar ApiService en NotificationService
+        ChangeNotifierProxyProvider<ApiService, NotificationService>(
+          create: (_) => NotificationService(), // Obtiene la instancia Singleton
+          update: (_, apiService, notificationService) {
+            // Aquí ocurre la magia: le pasamos el ApiService al NotificationService
+            if (notificationService != null) {
+              notificationService.setApiService(apiService);
+            }
+            return notificationService!;
+          },
+        ),
       ],
       child: MaterialApp(
         title: 'SaveMate',

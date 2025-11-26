@@ -70,4 +70,25 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    // --- NUEVO ENDPOINT PARA VINCULAR CUENTA ---
+    @PutMapping("/{id}/bank-account")
+    public ResponseEntity<?> linkBankAccount(@PathVariable Long id, @RequestBody Map<String, String> bankData) {
+        log.info("Solicitud para vincular cuenta bancaria usuario ID: {}", id);
+        try {
+            String bankAccount = bankData.get("bankAccount");
+            String bankName = bankData.get("bankName");
+
+            if (bankAccount == null || bankName == null) {
+                return ResponseEntity.badRequest().body("Faltan datos bancarios");
+            }
+
+            // Llamamos al método específico que ya tienes en UserService
+            UserDTO updatedUser = userService.linkBankAccount(id, bankAccount, bankName);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            log.error("Error vinculando cuenta: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

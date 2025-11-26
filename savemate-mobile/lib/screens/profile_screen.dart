@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
 import '../models/user.dart';
+import 'login_screen.dart';
+import 'bank_account_screen.dart'; // Asegúrate de tener este archivo creado
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -161,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           IconButton(
             onPressed: _logout,
-            icon: const Icon(Icons.logout, color: Colors.red),
+            icon: const Icon(Icons.logout, color: Colors.white),
           ),
         ],
       ),
@@ -462,25 +464,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // [FIX] Se corrigió para que navegue a la pantalla en lugar de abrir diálogo
   Widget _buildBankAccountCard(User user) {
+    bool hasAccount = user.bankAccount != null && user.bankAccount!.isNotEmpty;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: const Icon(Icons.account_balance, color: Colors.blue),
-        title: Text(
-          user.bankName ?? 'Sin banco vinculado',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          user.bankAccount != null
-              ? '•••• ${user.bankAccount!.substring(user.bankAccount!.length - 4)}'
-              : 'Vincula tu cuenta para automatizar ahorros',
-          style: GoogleFonts.poppins(),
-        ),
-        trailing: TextButton(
-          onPressed: _showBankAccountDialog,
-          child: Text(user.bankAccount != null ? 'Cambiar' : 'Vincular'),
+      child: InkWell(
+        onTap: () async {
+          // Navegar a la nueva pantalla y recargar datos al volver
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const BankAccountScreen()),
+          );
+          _loadUserData(); // Recargar para mostrar los cambios
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: hasAccount ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                child: Icon(
+                    Icons.account_balance,
+                    color: hasAccount ? Colors.green : Colors.grey
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hasAccount ? (user.bankName ?? 'Banco') : 'Vincular Cuenta',
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 16),
+                    ),
+                    Text(
+                      hasAccount
+                          ? '•••• ${user.bankAccount!.substring(user.bankAccount!.length - 4)}'
+                          : 'Configura tu cuenta para los débitos',
+                      style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.grey),
+            ],
+          ),
         ),
       ),
     );
@@ -513,54 +545,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _showBankAccountDialog() {
-    final bankController = TextEditingController();
-    final accountController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Vincular Cuenta', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Simulación de vinculación bancaria', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: bankController,
-              decoration: const InputDecoration(labelText: 'Nombre del Banco', border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: accountController,
-              decoration: const InputDecoration(labelText: 'Número de Cuenta', border: OutlineInputBorder()),
-              keyboardType: TextInputType.number,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (bankController.text.isNotEmpty && accountController.text.isNotEmpty) {
-                Provider.of<AuthService>(context, listen: false)
-                    .linkBankAccount(accountController.text, bankController.text);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Cuenta vinculada exitosamente'), backgroundColor: Colors.green),
-                );
-              }
-            },
-            child: const Text('Vincular'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _logout() {
     showDialog(
       context: context,
@@ -573,9 +557,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              Provider.of<AuthService>(context, listen: false).logout();
+              await Provider.of<AuthService>(context, listen: false).logout();
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (route) => false,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text('Cerrar Sesión'),

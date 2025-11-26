@@ -2,9 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:logger/logger.dart';
-import 'package:sms_reader/sms_reader.dart';
+// import 'package:sms_reader/sms_reader.dart'; // No necesario si usas Telephony
 import 'package:flutter/material.dart';
 import 'package:telephony/telephony.dart';
+import 'api_service.dart'; // [FIX] Importar ApiService
 
 class NotificationService with ChangeNotifier {
   static final NotificationService _instance = NotificationService._internal();
@@ -12,8 +13,11 @@ class NotificationService with ChangeNotifier {
   NotificationService._internal();
 
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
   final Logger _logger = Logger();
+
+  // [FIX] Referencia al ApiService para enviar datos al backend
+  ApiService? _apiService;
 
   bool _isInitialized = false;
   bool _hasSmsPermission = false;
@@ -23,6 +27,12 @@ class NotificationService with ChangeNotifier {
   bool get isInitialized => _isInitialized;
   bool get hasSmsPermission => _hasSmsPermission;
   bool get hasNotificationPermission => _hasNotificationPermission;
+
+  // [FIX] Método para inyectar el ApiService (Llamar esto en main.dart o tras el login)
+  void setApiService(ApiService service) {
+    _apiService = service;
+    _logger.i('ApiService inyectado en NotificationService');
+  }
 
   // Inicialización
   static Future<void> initialize(FlutterLocalNotificationsPlugin plugin) async {
@@ -42,18 +52,18 @@ class NotificationService with ChangeNotifier {
     try {
       // Configuración de Android
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+      AndroidInitializationSettings('@mipmap/ic_launcher');
 
       // Configuración de iOS
       const DarwinInitializationSettings initializationSettingsIOS =
-          DarwinInitializationSettings(
+      DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
         requestSoundPermission: true,
       );
 
       const InitializationSettings initializationSettings =
-          InitializationSettings(
+      InitializationSettings(
         android: initializationSettingsAndroid,
         iOS: initializationSettingsIOS,
       );
@@ -79,7 +89,7 @@ class NotificationService with ChangeNotifier {
       // Permisos de notificación
       final notificationStatus = await _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
 
       _hasNotificationPermission = notificationStatus ?? false;
@@ -121,7 +131,7 @@ class NotificationService with ChangeNotifier {
   }) async {
     try {
       const AndroidNotificationDetails androidPlatformChannelSpecifics =
-          AndroidNotificationDetails(
+      AndroidNotificationDetails(
         'savemate_channel',
         'SaveMate Notifications',
         channelDescription: 'Notificaciones de SaveMate',
@@ -131,7 +141,7 @@ class NotificationService with ChangeNotifier {
       );
 
       const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-          DarwinNotificationDetails(
+      DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
@@ -162,8 +172,8 @@ class NotificationService with ChangeNotifier {
   }) async {
     await showNotification(
       id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      title: '¡Ahorro Automático!',
-      body: 'Se han ahorrado \$${amount.toStringAsFixed(2)} de tu compra en $merchant',
+      title: '¡Ahorro Automático! 💰',
+      body: 'Se han ahorrado \$${amount.toStringAsFixed(0)} de tu compra en $merchant',
       payload: 'saving',
     );
   }
@@ -231,8 +241,10 @@ class NotificationService with ChangeNotifier {
         final transactionData = _parseBankingSms(sms.body ?? '');
 
         if (transactionData != null) {
+          // Procesar con el backend
           _processTransactionFromSms(transactionData);
 
+          // Mostrar notificación inmediata de detección
           showNotification(
             id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
             title: 'Transacción Detectada',
@@ -290,23 +302,46 @@ class NotificationService with ChangeNotifier {
     }
   }
 
+  // [FIX] Implementación completa de la conexión con el Backend
   Future<void> _processTransactionFromSms(Map<String, dynamic> transactionData) async {
     try {
-      // Aquí se llamaría al ApiService para procesar la transacción
-      // Por ahora, solo logueamos
-      _logger.i('Processing transaction from SMS: $transactionData');
+      _logger.i('Procesando transacción desde SMS: $transactionData');
 
-      // TODO: Implementar llamada al backend
-      // await _apiService.processTransactionFromNotification(
-      //   userId: _currentUserId,
-      //   amount: transactionData['amount'],
-      //   description: transactionData['description'],
-      //   merchantName: transactionData['merchant'],
-      //   notificationSource: transactionData['notificationSource'],
-      //   bankReference: transactionData['bankReference'],
-      // );
+      // 1. Verificar si el ApiService está disponible
+      if (_apiService == null) {
+        _logger.w('⚠️ ApiService no inicializado en NotificationService. No se puede enviar al backend.');
+        return;
+      }
+
+      // 2. Verificar si hay un usuario autenticado
+      final currentUser = _apiService!.currentUser;
+      if (currentUser == null || currentUser.id == null) {
+        _logger.w('⚠️ No hay usuario logueado. Transacción ignorada.');
+        return;
+      }
+
+      // 3. Llamada al Backend
+      final transaction = await _apiService!.processTransactionFromNotification(
+        userId: currentUser.id!, // ID del usuario actual
+        amount: transactionData['amount'],
+        description: transactionData['description'],
+        merchantName: transactionData['merchant'],
+        notificationSource: 'SMS',
+        bankReference: transactionData['bankReference'],
+      );
+
+      _logger.i('✅ Transacción enviada al backend exitosamente. ID: ${transaction.id}');
+
+      // 4. Si el backend calculó un ahorro, notificar al usuario
+      if (transaction.savingAmount != null && transaction.savingAmount! > 0) {
+        showSavingNotification(
+          amount: transaction.savingAmount!,
+          merchant: transaction.merchantName ?? 'Comercio',
+        );
+      }
+
     } catch (e) {
-      _logger.e('Error processing transaction from SMS: $e');
+      _logger.e('🔥 Error enviando transacción al backend: $e');
     }
   }
 
@@ -317,16 +352,16 @@ class NotificationService with ChangeNotifier {
     // Manejar diferentes tipos de notificaciones
     switch (response.payload) {
       case 'saving':
-        // Navegar a pantalla de ahorros
+      // Navegar a pantalla de ahorros
         break;
       case 'goal_completed':
-        // Navegar a pantalla de metas
+      // Navegar a pantalla de metas
         break;
       case 'recommendation':
-        // Navegar a pantalla de recomendaciones
+      // Navegar a pantalla de recomendaciones
         break;
       case 'transaction_detected':
-        // Navegar a pantalla de transacciones
+      // Navegar a pantalla de transacciones
         break;
     }
   }
@@ -360,5 +395,3 @@ class NotificationService with ChangeNotifier {
     }
   }
 }
-
-

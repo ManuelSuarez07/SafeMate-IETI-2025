@@ -45,33 +45,63 @@ public class TransactionService {
         transaction.setNotificationSource(transactionDTO.getNotificationSource());
         transaction.setBankReference(transactionDTO.getBankReference());
 
-        // --- LÓGICA CORREGIDA: Gastos (Redondeo) vs Ingresos (Total) ---
         if (transactionDTO.getTransactionType() == Transaction.TransactionType.EXPENSE) {
-            // Si es GASTO: Calcula el 'pico' (redondeo o porcentaje)
             calculateAndApplySaving(transaction, user);
         }
         else if (transactionDTO.getTransactionType() == Transaction.TransactionType.INCOME) {
-            // Si es INGRESO: Todo el monto cuenta como ahorro/saldo positivo para el usuario
             transaction.setSavingAmount(transactionDTO.getAmount());
             log.info("Ingreso de ${} registrado como ahorro total.", transactionDTO.getAmount());
         }
-        // ---------------------------------------------------------------
 
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // Actualizar el total acumulado del usuario (Suma tanto redondeos como ingresos completos)
         if (savedTransaction.getSavingAmount() != null && savedTransaction.getSavingAmount() > 0) {
             userService.updateTotalSaved(user.getId(), savedTransaction.getSavingAmount());
-            log.info("Ahorro de ${} sumado al usuario {}", savedTransaction.getSavingAmount(), user.getId());
         }
 
         return convertToDTO(savedTransaction);
+    }
+
+    // --- NUEVO MÉTODO PARA RETIROS ---
+    @Transactional
+    public TransactionDTO createWithdrawal(Long userId, Double amount) {
+        log.info("Procesando retiro de ${} para usuario ID: {}", amount, userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // 1. Verificar fondos suficientes
+        if (user.getTotalSaved() == null || user.getTotalSaved() < amount) {
+            throw new RuntimeException("Fondos insuficientes para realizar el retiro");
+        }
+
+        // 2. Crear transacción de retiro
+        Transaction t = new Transaction();
+        t.setUser(user);
+        t.setAmount(amount);
+        t.setDescription("Retiro a cuenta vinculada " + (user.getBankName() != null ? user.getBankName() : ""));
+        t.setTransactionDate(LocalDateTime.now());
+        t.setTransactionType(Transaction.TransactionType.WITHDRAWAL);
+        t.setStatus(Transaction.TransactionStatus.COMPLETED);
+
+        // 3. IMPORTANTE: El savingAmount es negativo para reflejar la resta en reportes si se desea,
+        // o simplemente se maneja la resta en el saldo del usuario.
+        // Para consistencia con updateTotalSaved que SUMA, pasaremos el monto negativo.
+
+        Transaction saved = transactionRepository.save(t);
+
+        // 4. Restar del saldo del usuario (Pasamos monto negativo)
+        userService.updateTotalSaved(userId, -amount);
+
+        log.info("Retiro exitoso. Nuevo saldo: {}", user.getTotalSaved() - amount);
+
+        return convertToDTO(saved);
     }
 
     @Transactional
     public TransactionDTO processTransactionFromNotification(Long userId, Double amount, String description,
                                                              String merchantName, String notificationSource,
                                                              String bankReference) {
+        // ... (código existente igual) ...
         log.info("Procesando transacción desde notificación para usuario ID: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -97,7 +127,7 @@ public class TransactionService {
         return convertToDTO(savedTransaction);
     }
 
-    // Lógica de cálculo para GASTOS (Redondeo/Porcentaje)
+    // ... (resto de métodos privados y createSavingDeposit se mantienen igual) ...
     private void calculateAndApplySaving(Transaction transaction, User user) {
         Double savingAmount = 0.0;
         Double roundedAmount = 0.0;
@@ -166,7 +196,7 @@ public class TransactionService {
         t.setStatus(Transaction.TransactionStatus.COMPLETED);
 
         Transaction saved = transactionRepository.save(t);
-        userService.updateTotalSaved(userId, amount);
+        userService.updateTotalSaved(userId, amount); // Suma positiva
 
         return convertToDTO(saved);
     }

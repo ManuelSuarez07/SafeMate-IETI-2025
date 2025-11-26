@@ -59,6 +59,7 @@ const _$TransactionTypeEnumMap = {
   TransactionType.income: 'INCOME',
   TransactionType.saving: 'SAVING',
   TransactionType.fee: 'FEE',
+  TransactionType.withdrawal: 'WITHDRAWAL',
 };
 
 const _$TransactionStatusEnumMap = {

@@ -8,19 +8,22 @@ import '../models/saving.dart';
 import '../models/ai_recommendation.dart';
 
 class ApiService with ChangeNotifier {
+  // Asegúrate de usar la IP correcta para tu emulador/dispositivo
+  // Emulador Android: 10.0.2.2
+  // iOS / Dispositivo Físico: Tu IP local (ej: 192.168.1.X)
   static const String baseUrl = 'http://10.0.2.2:8080/api';
 
   final Dio _dio = Dio();
   final Logger _logger = Logger();
-  
+
   String? _accessToken;
   User? _currentUser;
-  
+
   ApiService() {
     _dio.options.baseUrl = baseUrl;
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
-    
+
     // Interceptor para agregar token
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
@@ -46,7 +49,8 @@ class ApiService with ChangeNotifier {
   User? get currentUser => _currentUser;
   bool get isAuthenticated => _accessToken != null && _currentUser != null;
 
-  // Métodos de autenticación
+  // --- AUTENTICACIÓN ---
+
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await _dio.post('/auth/login', data: {
@@ -56,10 +60,7 @@ class ApiService with ChangeNotifier {
 
       final data = response.data;
       _accessToken = data['accessToken'];
-      
-      // Guardar token en SharedPreferences
-      // await _storage.write(key: 'access_token', value: _accessToken);
-      
+
       notifyListeners();
       return data;
     } on DioException catch (e) {
@@ -71,10 +72,6 @@ class ApiService with ChangeNotifier {
   Future<void> logout() async {
     _accessToken = null;
     _currentUser = null;
-    
-    // Limpiar SharedPreferences
-    // await _storage.delete(key: 'access_token');
-    
     notifyListeners();
   }
 
@@ -86,7 +83,7 @@ class ApiService with ChangeNotifier {
 
       final data = response.data;
       _accessToken = data['accessToken'];
-      
+
       notifyListeners();
       return data;
     } on DioException catch (e) {
@@ -95,19 +92,13 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // Métodos de usuarios
+  // --- USUARIOS ---
+
   Future<User> createUser(User user, String password) async {
     try {
-      // PASO 1: Obtener el mapa del usuario
-      // Si usas el toJson generado, asegúrate de que user.g.dart esté actualizado.
-      // Si no estás seguro, el manual de abajo es más seguro.
       final Map<String, dynamic> userMap = user.toJson();
-
-      // PASO 2: Insertar la contraseña en el MISMO nivel (Flat JSON)
       userMap['password'] = password;
 
-      // PASO 3: Enviar el mapa plano
-      // ANTES ENVIABAS: data: { "user": user.toJson(), "password": password } (ESTO ESTABA MAL)
       final response = await _dio.post('/users', data: userMap);
 
       final createdUser = User.fromJson(response.data);
@@ -120,8 +111,6 @@ class ApiService with ChangeNotifier {
       throw _handleError(e);
     }
   }
-
-
 
   Future<User> getUserById(int id) async {
     try {
@@ -137,12 +126,12 @@ class ApiService with ChangeNotifier {
     try {
       final response = await _dio.put('/users/$id', data: user.toJson());
       final updatedUser = User.fromJson(response.data);
-      
+
       if (_currentUser?.id == id) {
         _currentUser = updatedUser;
         notifyListeners();
       }
-      
+
       return updatedUser;
     } on DioException catch (e) {
       _logger.e('Update user error: ${e.response?.data}');
@@ -154,12 +143,12 @@ class ApiService with ChangeNotifier {
     try {
       final response = await _dio.put('/users/$id/saving-config', data: config);
       final updatedUser = User.fromJson(response.data);
-      
+
       if (_currentUser?.id == id) {
         _currentUser = updatedUser;
         notifyListeners();
       }
-      
+
       return updatedUser;
     } on DioException catch (e) {
       _logger.e('Update saving config error: ${e.response?.data}');
@@ -167,7 +156,31 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // Métodos de transacciones
+  // ✅ Método para VINCULAR CUENTA BANCARIA (Prioridad 2)
+  Future<User> linkBankAccount(int userId, String bankAccount, String bankName) async {
+    try {
+      final response = await _dio.put('/users/$userId/bank-account', data: {
+        'bankAccount': bankAccount,
+        'bankName': bankName,
+      });
+
+      final updatedUser = User.fromJson(response.data);
+
+      // Actualizar el usuario local para que la UI se refresque
+      if (_currentUser?.id == userId) {
+        _currentUser = updatedUser;
+        notifyListeners();
+      }
+
+      return updatedUser;
+    } on DioException catch (e) {
+      _logger.e('Link bank account error: ${e.response?.data}');
+      throw _handleError(e);
+    }
+  }
+
+  // --- TRANSACCIONES ---
+
   Future<Transaction> createTransaction(Transaction transaction) async {
     try {
       final response = await _dio.post('/transactions', data: transaction.toJson());
@@ -178,6 +191,58 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  // ✅ Método para DEPÓSITO SIMULADO (Prioridad 3)
+  Future<Transaction> createSavingDeposit({
+    required int userId,
+    required double amount,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/transactions/saving-deposit',
+        queryParameters: { // Usamos queryParameters porque el Controller espera @RequestParam
+          'userId': userId,
+          'amount': amount,
+          'description': 'Recarga desde cuenta vinculada',
+        },
+      );
+
+      // Forzar actualización del usuario para reflejar el nuevo saldo en el Home
+      final updatedUser = await getUserById(userId);
+      setCurrentUser(updatedUser);
+
+      return Transaction.fromJson(response.data);
+    } on DioException catch (e) {
+      _logger.e('Deposit error: ${e.response?.data}');
+      throw _handleError(e);
+    }
+  }
+
+  Future<Transaction> withdrawFunds({
+    required int userId,
+    required double amount,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/transactions/withdraw',
+        queryParameters: {
+          'userId': userId,
+          'amount': amount,
+          'description': 'Retiro a cuenta bancaria',
+        },
+      );
+
+      // Actualizamos datos del usuario para reflejar el nuevo saldo
+      final updatedUser = await getUserById(userId);
+      setCurrentUser(updatedUser);
+
+      return Transaction.fromJson(response.data);
+    } on DioException catch (e) {
+      _logger.e('Withdraw error: ${e.response?.data}');
+      throw _handleError(e);
+    }
+  }
+
+  // ✅ Método para PROCESAR NOTIFICACIONES/SMS (Prioridad 1)
   Future<Transaction> processTransactionFromNotification({
     required int userId,
     required double amount,
@@ -187,7 +252,7 @@ class ApiService with ChangeNotifier {
     String? bankReference,
   }) async {
     try {
-      final response = await _dio.post('/transactions/from-notification', data: {
+      final response = await _dio.post('/transactions/from-notification', queryParameters: {
         'userId': userId,
         'amount': amount,
         'description': description,
@@ -195,6 +260,11 @@ class ApiService with ChangeNotifier {
         if (notificationSource != null) 'notificationSource': notificationSource,
         if (bankReference != null) 'bankReference': bankReference,
       });
+
+      // Actualizar usuario para reflejar el ahorro automático
+      final updatedUser = await getUserById(userId);
+      setCurrentUser(updatedUser);
+
       return Transaction.fromJson(response.data);
     } on DioException catch (e) {
       _logger.e('Process notification error: ${e.response?.data}');
@@ -224,7 +294,8 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // Métodos de ahorros
+  // --- AHORROS (METAS) ---
+
   Future<Saving> createSavingGoal(Saving saving) async {
     try {
       final response = await _dio.post('/savings', data: saving.toJson());
@@ -269,7 +340,8 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // Métodos de IA
+  // --- IA / RECOMENDACIONES ---
+
   Future<List<AIRecommendation>> getActiveRecommendations(int userId) async {
     try {
       final response = await _dio.get('/ai/user/$userId/active');
@@ -300,7 +372,8 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // Métodos de utilidad
+  // --- UTILIDADES ---
+
   void setToken(String token) {
     _accessToken = token;
     notifyListeners();
@@ -322,7 +395,10 @@ class ApiService with ChangeNotifier {
       case DioExceptionType.badResponse:
         if (error.response?.data is Map<String, dynamic>) {
           final data = error.response!.data as Map<String, dynamic>;
+          // Intenta extraer el mensaje de error del backend
           return data['error'] ?? data['message'] ?? 'Error del servidor';
+        } else if (error.response?.data is String) {
+          return error.response!.data.toString();
         }
         return 'Error del servidor: ${error.response?.statusCode}';
       case DioExceptionType.cancel:

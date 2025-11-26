@@ -12,6 +12,8 @@ import 'transactions_screen.dart';
 import 'savings_screen.dart';
 import 'ai_recommendations_screen.dart';
 import 'profile_screen.dart';
+import 'deposit_screen.dart';
+import 'withdraw_screen.dart'; // ✅ [FIX] Importar pantalla de retiro
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -24,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   late PageController _pageController;
 
-  // Keys para acceder al estado de las pantallas hijas
   final GlobalKey<TransactionsScreenState> _transactionsKey = GlobalKey();
   final GlobalKey<SavingsScreenState> _savingsKey = GlobalKey();
 
@@ -57,13 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
       final apiService = Provider.of<ApiService>(context, listen: false);
 
       if (authService.user?.id != null) {
-        // 1. Actualizar perfil del usuario (para obtener el nuevo total ahorrado)
         final updatedUser = await apiService.getUserById(authService.user!.id!);
-        authService.updateProfileLocal(updatedUser); // Necesitas añadir este método en AuthService (ver abajo) o usar setCurrentUser
+        authService.updateProfileLocal(updatedUser);
 
-        // 2. Cargar transacciones recientes
         final transactions = await apiService.getTransactionsByUserId(authService.user!.id!);
-        // Ordenar por fecha descendente para ver las nuevas primero
         transactions.sort((a, b) {
           final dateA = a.transactionDate ?? a.createdAt ?? DateTime.now();
           final dateB = b.transactionDate ?? b.createdAt ?? DateTime.now();
@@ -76,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         }
 
-        // 3. Cargar metas activas
         final goals = await apiService.getActiveSavingGoals(authService.user!.id!);
         if (mounted) {
           setState(() {
@@ -84,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         }
 
-        // 4. Cargar recomendaciones activas
         final recommendations = await apiService.getActiveRecommendations(authService.user!.id!);
         if (mounted) {
           setState(() {
@@ -103,21 +99,18 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Función para navegar y ejecutar acción
   void _navigateToTab(int index, {VoidCallback? action}) {
     setState(() {
       _currentIndex = index;
     });
 
-    _pageController.jumpToPage(index); // Usar jumpToPage para respuesta instantánea
+    _pageController.jumpToPage(index);
 
-    // Si volvemos al Home (index 0), recargamos los datos
     if (index == 0) {
       _loadData();
     }
 
     if (action != null) {
-      // Pequeño delay para asegurar que la página montó
       Future.delayed(const Duration(milliseconds: 100), action);
     }
   }
@@ -131,7 +124,6 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _currentIndex = index;
           });
-          // Si deslizamos manualmente al Home, recargar datos
           if (index == 0) {
             _loadData();
           }
@@ -163,7 +155,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeTab() {
-    // Consumimos AuthService para que si cambia el usuario (total ahorrado), se redibuje
     return Consumer<AuthService>(
       builder: (context, authService, child) {
         return RefreshIndicator(
@@ -174,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20), // Espacio para la status bar
+                const SizedBox(height: 20),
                 _buildHeader(authService.user),
                 const SizedBox(height: 24),
                 _buildSavingsCard(authService.user),
@@ -183,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
                 _buildActiveGoals(),
                 const SizedBox(height: 24),
-                _buildRecentTransactions(), // Ahora usa la lista actualizada _recentTransactions
+                _buildRecentTransactions(),
                 const SizedBox(height: 24),
                 _buildRecommendations(),
                 const SizedBox(height: 100),
@@ -219,9 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         IconButton(
-          onPressed: () {
-            // Notificaciones
-          },
+          onPressed: () {},
           icon: const Icon(Icons.notifications),
         ),
       ],
@@ -256,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total Ahorrado',
+                'Ahorro Total',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   color: Colors.white.withOpacity(0.9),
@@ -281,55 +270,43 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               Expanded(
-                child: _buildStatItem(
-                  'Tipo',
-                  user?.savingTypeDisplay ?? 'Redondeo',
-                  Icons.auto_graph,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const DepositScreen()),
+                    ).then((_) => _loadData());
+                  },
+                  icon: const Icon(Icons.add, color: Color(0xFF2E7D32)),
+                  label: const Text('Recargar', style: TextStyle(color: Color(0xFF2E7D32))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF2E7D32),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
+              // ✅ [FIX] Botón de Retirar conectado a WithdrawScreen
               Expanded(
-                child: _buildStatItem(
-                  'Mes',
-                  // Esto es un ejemplo, idealmente vendría del backend
-                  '\$${((user?.totalSaved ?? 0.0) * 0.1).toStringAsFixed(2)}',
-                  Icons.trending_up,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 20),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Colors.white.withOpacity(0.8),
-                ),
-              ),
-              Text(
-                value,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const WithdrawScreen()),
+                    ).then((_) => _loadData()); // Recargar datos al volver
+                  },
+                  icon: const Icon(Icons.arrow_upward, color: Colors.white),
+                  label: const Text('Retirar', style: TextStyle(color: Colors.white)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -492,7 +469,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRecentTransactions() {
-    // Usamos _recentTransactions que se actualiza en _loadData
     if (_recentTransactions.isEmpty) {
       return Center(
         child: Padding(
@@ -622,6 +598,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case TransactionType.income: return Icons.attach_money;
       case TransactionType.saving: return Icons.savings;
       case TransactionType.fee: return Icons.receipt;
+      case TransactionType.withdrawal: return Icons.arrow_circle_up;
     }
   }
 }

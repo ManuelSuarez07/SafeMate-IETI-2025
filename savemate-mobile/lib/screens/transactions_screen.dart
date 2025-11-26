@@ -519,6 +519,8 @@ class TransactionsScreenState extends State<TransactionsScreen>
         return Icons.savings;
       case TransactionType.fee:
         return Icons.receipt;
+      case TransactionType.withdrawal:
+        return Icons.account_balance_wallet_outlined;
     }
   }
 
