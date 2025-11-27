@@ -15,7 +15,9 @@ class AuthService with ChangeNotifier {
   String? _errorMessage;
 
   AuthService(this._prefs, this._apiService) {
-    _loadUserFromPrefs();
+    // CORRECCIÓN CRÍTICA: Usamos Future.microtask para evitar el error
+    // "setState() or markNeedsBuild() called during build"
+    Future.microtask(() => _loadUserFromPrefs());
   }
 
   // Getters
@@ -69,21 +71,12 @@ class AuthService with ChangeNotifier {
     _clearError();
 
     try {
-      if (user.username == null || user.username!.isEmpty) {
-        // Lógica opcional para username
-      }
-
       final createdUser = await _apiService.createUser(user, password);
-
       final loginSuccess = await login(createdUser.email ?? user.email!, password);
-
-      if (loginSuccess) {
-        // Login maneja el guardado
-      }
 
       _setLoading(false);
       _logger.i('Registration successful for user: ${user.email}');
-      return true;
+      return loginSuccess;
     } catch (e) {
       _setError(e.toString());
       _setLoading(false);
@@ -142,22 +135,17 @@ class AuthService with ChangeNotifier {
     _clearError();
 
     try {
-      if (_user?.id == null) {
-        throw Exception('Usuario no autenticado (ID nulo)');
-      }
+      if (_user?.id == null) throw Exception('Usuario no autenticado');
 
       final user = await _apiService.updateUser(_user!.id!, updatedUser);
       _user = user;
-
       await _saveUserToPrefs();
 
       _setLoading(false);
-      _logger.i('Profile updated successfully');
       return true;
     } catch (e) {
       _setError(e.toString());
       _setLoading(false);
-      _logger.e('Profile update failed: $e');
       return false;
     }
   }
@@ -173,13 +161,9 @@ class AuthService with ChangeNotifier {
     _clearError();
 
     try {
-      if (_user?.id == null) {
-        throw Exception('Usuario no autenticado');
-      }
+      if (_user?.id == null) throw Exception('Usuario no autenticado');
 
-      // CORRECCIÓN: Convertir a MAYÚSCULAS explícitamente para el Backend Java
       String savingTypeString = savingType == SavingType.rounding ? 'ROUNDING' : 'PERCENTAGE';
-
       String insufficientOptionString;
       switch (insufficientBalanceOption) {
         case InsufficientBalanceOption.noSaving:
@@ -203,28 +187,21 @@ class AuthService with ChangeNotifier {
 
       _user = user;
       await _saveUserToPrefs();
-
       _setLoading(false);
-      _logger.i('Saving configuration updated successfully');
       return true;
     } catch (e) {
       _setError(e.toString());
       _setLoading(false);
-      _logger.e('Saving configuration update failed: $e');
       return false;
     }
   }
-
-  // --- MÉTODOS AGREGADOS (Corrección) ---
 
   Future<bool> linkBankAccount(String bankAccount, String bankName) async {
     _setLoading(true);
     _clearError();
 
     try {
-      if (_user?.id == null) {
-        throw Exception('Usuario no autenticado');
-      }
+      if (_user?.id == null) throw Exception('Usuario no autenticado');
 
       final user = await _apiService.updateSavingConfiguration(_user!.id!, {
         'bankAccount': bankAccount,
@@ -233,19 +210,15 @@ class AuthService with ChangeNotifier {
 
       _user = user;
       await _saveUserToPrefs();
-
       _setLoading(false);
-      _logger.i('Bank account linked successfully');
       return true;
     } catch (e) {
       _setError(e.toString());
       _setLoading(false);
-      _logger.e('Bank account linking failed: $e');
       return false;
     }
   }
 
-  // Este es el método que te faltaba:
   bool hasBankAccount() {
     return _user?.bankAccount != null && _user!.bankAccount!.isNotEmpty;
   }
@@ -255,8 +228,6 @@ class AuthService with ChangeNotifier {
     notifyListeners();
     _saveUserToPrefs();
   }
-
-  // --------------------------------------
 
   // --- MÉTODOS PRIVADOS ---
 
@@ -308,11 +279,6 @@ class AuthService with ChangeNotifier {
     _clearError();
   }
 
-  String get savingTypeDisplay {
-    return _user?.savingTypeDisplay ?? 'Redondeo';
-  }
-
-  String get totalSavedDisplay {
-    return '\$${(_user?.totalSaved ?? 0.0).toStringAsFixed(2)}';
-  }
+  String get savingTypeDisplay => _user?.savingTypeDisplay ?? 'Redondeo';
+  String get totalSavedDisplay => '\$${(_user?.totalSaved ?? 0.0).toStringAsFixed(2)}';
 }

@@ -21,10 +21,14 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadRecommendations();
+    // Usamos addPostFrameCallback para asegurar que el contexto esté listo
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadRecommendations();
+    });
   }
 
   Future<void> _loadRecommendations() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
     });
@@ -35,18 +39,25 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
 
       if (authService.user?.id != null) {
         final recommendations = await apiService.getActiveRecommendations(authService.user!.id!);
-        _recommendations = recommendations;
+        if (mounted) {
+          setState(() {
+            _recommendations = recommendations;
+          });
+        }
       }
     } catch (e) {
-      print('Error loading recommendations: $e');
+      debugPrint('Error loading recommendations: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _generateRecommendations() async {
+    if (!mounted) return;
     setState(() {
       _isGenerating = true;
     });
@@ -56,48 +67,65 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
       final apiService = Provider.of<ApiService>(context, listen: false);
 
       if (authService.user?.id != null) {
-        await apiService.generateAllRecommendations(authService.user!.id!);
+        // Llamada al backend para que Gemini genere nuevas recomendaciones
+        // Asumiendo que generateSpendingPatternRecommendations es el endpoint principal
+        await apiService.generateSpendingPatternRecommendations(authService.user!.id!);
+
+        // Recargar la lista para mostrar las nuevas
         await _loadRecommendations();
-        
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('¡Análisis de IA completado exitosamente!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Recomendaciones generadas exitosamente'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text('Error generando recomendaciones: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error generando recomendaciones: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
     } finally {
-      setState(() {
-        _isGenerating = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isGenerating = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50], // Fondo ligeramente gris para resaltar tarjetas
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black87),
         title: Text(
           'Recomendaciones IA',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              color: Colors.black87
+          ),
         ),
         actions: [
           IconButton(
             onPressed: _isGenerating ? null : _generateRecommendations,
-            icon: _isGenerating 
+            icon: _isGenerating
                 ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                : const Icon(Icons.refresh),
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.purple),
+            )
+                : const Icon(Icons.refresh, color: Colors.purple),
           ),
         ],
       ),
@@ -106,19 +134,29 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _recommendations.isEmpty
-                ? _buildEmptyState()
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildHeader(),
-                        const SizedBox(height: 24),
-                        ..._recommendations.map((rec) => _buildRecommendationCard(rec)).toList(),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
-                  ),
+            ? _buildEmptyState()
+            : SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 24),
+              Text(
+                'Sugerencias para ti',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ..._recommendations.map((rec) => _buildRecommendationCard(rec)).toList(),
+              const SizedBox(height: 40), // Espacio extra al final
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -134,29 +172,30 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Colors.purple.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.lightbulb_outline,
+              child: const Icon(
+                Icons.smart_toy_outlined, // Ícono más moderno para IA
                 size: 60,
-                color: Theme.of(context).primaryColor,
+                color: Colors.purple,
               ),
             ),
             const SizedBox(height: 24),
             Text(
-              'No hay recomendaciones',
+              'Aún no tienes recomendaciones',
               style: GoogleFonts.poppins(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+                color: Colors.grey[800],
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
-              'Genera recomendaciones personalizadas para optimizar tus ahorros',
+              'Deja que nuestra IA analice tus finanzas y encuentre formas de ahorrar.',
               style: GoogleFonts.poppins(
-                fontSize: 16,
+                fontSize: 14,
                 color: Colors.grey[600],
               ),
               textAlign: TextAlign.center,
@@ -164,16 +203,21 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: _isGenerating ? null : _generateRecommendations,
-              icon: _isGenerating 
+              icon: _isGenerating
                   ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              )
                   : const Icon(Icons.auto_awesome),
-              label: Text(_isGenerating ? 'Generando...' : 'Generar Recomendaciones'),
+              label: Text(_isGenerating ? 'Analizando...' : 'Generar Análisis IA'),
               style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
             ),
           ],
@@ -186,7 +230,7 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     final totalPotentialSavings = _recommendations
         .where((r) => r.hasPotentialSavings)
         .fold<double>(0, (sum, r) => sum + (r.potentialSavings ?? 0));
-    
+
     final highConfidenceCount = _recommendations
         .where((r) => r.hasHighConfidence)
         .length;
@@ -194,29 +238,33 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.purple,
-            Colors.blue,
-          ],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6A1B9A), Color(0xFF8E24AA)], // Tonos morados SafeMate
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.psychology,
                 color: Colors.white,
                 size: 28,
               ),
               const SizedBox(width: 12),
               Text(
-                'Asistente IA',
+                'Resumen Inteligente',
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -225,32 +273,52 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: _buildHeaderStat(
-                  'Recomendaciones',
+                  'Oportunidades',
                   '${_recommendations.length}',
                   Colors.white,
                 ),
               ),
-              const SizedBox(width: 16),
+              Container(width: 1, height: 40, color: Colors.white24),
               Expanded(
-                child: _buildHeaderStat(
-                  'Alta Confianza',
-                  '$highConfidenceCount',
-                  Colors.white.withOpacity(0.9),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: _buildHeaderStat(
+                    'Alta Confianza',
+                    '$highConfidenceCount',
+                    Colors.white,
+                  ),
                 ),
               ),
             ],
           ),
           if (totalPotentialSavings > 0) ...[
-            const SizedBox(height: 12),
-            _buildHeaderStat(
-              'Ahorro Potencial',
-              '\$${totalPotentialSavings.toStringAsFixed(2)}',
-              Colors.white,
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.savings_outlined, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Ahorro posible: \$${totalPotentialSavings.toStringAsFixed(2)}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
@@ -266,13 +334,14 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
           label,
           style: GoogleFonts.poppins(
             fontSize: 12,
-            color: color.withOpacity(0.9),
+            color: color.withOpacity(0.8),
           ),
         ),
+        const SizedBox(height: 4),
         Text(
           value,
           style: GoogleFonts.poppins(
-            fontSize: 16,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: color,
           ),
@@ -284,196 +353,154 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
   Widget _buildRecommendationCard(AIRecommendation recommendation) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(
-          color: recommendation.typeColor.withOpacity(0.2),
-          width: 1,
-        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: recommendation.typeColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  _getRecommendationIcon(recommendation.recommendationType),
-                  color: recommendation.typeColor,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => _showRecommendationDetails(recommendation),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Encabezado de la tarjeta
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      recommendation.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: recommendation.typeColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    Text(
-                      recommendation.recommendationTypeDisplay,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
+                      child: Icon(
+                        _getRecommendationIcon(recommendation.recommendationType),
                         color: recommendation.typeColor,
+                        size: 24,
                       ),
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            recommendation.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            recommendation.categoryDisplay,
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (recommendation.isHighPriority)
+                      Icon(Icons.priority_high_rounded, color: Colors.orange[700], size: 20),
                   ],
                 ),
-              ),
-              Row(
-                children: [
-                  if (recommendation.hasHighConfidence)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        recommendation.formattedConfidenceScore,
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.green,
+
+                const SizedBox(height: 16),
+
+                // Contenido
+                Text(
+                  recommendation.description,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey[700],
+                    height: 1.5,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 16),
+
+                // Footer con botones
+                Row(
+                  children: [
+                    if (recommendation.hasPotentialSavings)
+                      Expanded(
+                        child: Text(
+                          'Ahorra: ${recommendation.formattedPotentialSavings}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green[700],
+                          ),
                         ),
                       ),
-                    ),
-                  if (recommendation.isHighPriority) ...[
+
                     const SizedBox(width: 8),
-                    Icon(
-                      Icons.priority_high,
-                      color: Colors.red,
-                      size: 16,
-                    ),
+
+                    if (!recommendation.isApplied)
+                      ElevatedButton(
+                        onPressed: () => _applyRecommendation(recommendation),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: recommendation.typeColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          minimumSize: const Size(0, 36),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Aplicar',
+                          style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500),
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.green.withOpacity(0.2)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.check, size: 14, color: Colors.green),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Aplicada',
+                              style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.green
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
-                ],
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Descripción
-          Text(
-            recommendation.description,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.grey[700],
-              height: 1.4,
+                ),
+              ],
             ),
           ),
-          
-          if (recommendation.hasPotentialSavings) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.trending_up,
-                    color: Colors.green,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Ahorro potencial: ${recommendation.formattedPotentialSavings}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          
-          const SizedBox(height: 16),
-          
-          // Footer
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Creada: ${recommendation.formattedCreatedDate}',
-                style: GoogleFonts.poppins(
-                  fontSize: 10,
-                  color: Colors.grey[500],
-                ),
-              ),
-              if (recommendation.expiresAt != null)
-                Text(
-                  'Expira: ${recommendation.formattedExpiresAt}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 10,
-                    color: recommendation.isExpired ? Colors.red : Colors.grey[500],
-                  ),
-                ),
-            ],
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Acciones
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: recommendation.isApplied 
-                      ? null 
-                      : () => _applyRecommendation(recommendation),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: recommendation.typeColor,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: Text(
-                    recommendation.isApplied ? 'Aplicada' : 'Aplicar',
-                    style: GoogleFonts.poppins(fontSize: 12),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton(
-                onPressed: () => _showRecommendationDetails(recommendation),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: recommendation.typeColor),
-                ),
-                child: Text(
-                  'Detalles',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: recommendation.typeColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -481,130 +508,250 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
   IconData _getRecommendationIcon(RecommendationType type) {
     switch (type) {
       case RecommendationType.spendingPattern:
-        return Icons.analytics;
+        return Icons.pie_chart_outline;
       case RecommendationType.savingOptimization:
         return Icons.trending_up;
       case RecommendationType.goalAdjustment:
-        return Icons.flag;
+        return Icons.flag_outlined;
       case RecommendationType.roundingConfig:
-        return Icons.auto_graph;
+        return Icons.published_with_changes;
       case RecommendationType.percentageConfig:
         return Icons.percent;
       case RecommendationType.expenseReduction:
-        return Icons.shopping_cart;
+        return Icons.content_cut;
       case RecommendationType.incomeIncrease:
-        return Icons.attach_money;
+        return Icons.monetization_on_outlined;
+      default:
+        return Icons.lightbulb_outline;
     }
   }
 
   Future<void> _applyRecommendation(AIRecommendation recommendation) async {
+    if (!mounted) return;
+
+    // Feedback táctil inmediato
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Aplicando recomendación...'),
+        duration: Duration(milliseconds: 1000),
+      ),
+    );
+
     try {
       final apiService = Provider.of<ApiService>(context, listen: false);
       await apiService.applyRecommendation(recommendation.id!);
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Recomendación aplicada exitosamente'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      
-      _loadRecommendations();
+
+      await _loadRecommendations(); // Recargar para ver cambios
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('¡Recomendación aplicada!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error aplicando recomendación: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   void _showRecommendationDetails(AIRecommendation recommendation) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          recommendation.title,
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
         ),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                recommendation.description,
-                style: GoogleFonts.poppins(height: 1.4),
-              ),
-              const SizedBox(height: 16),
-              _buildDetailRow('Tipo', recommendation.recommendationTypeDisplay),
-              _buildDetailRow('Categoría', recommendation.categoryDisplay),
-              _buildDetailRow('Prioridad', recommendation.priorityDisplay),
-              _buildDetailRow('Confianza', recommendation.formattedConfidenceScore),
-              if (recommendation.hasPotentialSavings)
-                _buildDetailRow('Ahorro Potencial', recommendation.formattedPotentialSavings),
-              _buildDetailRow('Estado', recommendation.statusDisplay),
-              _buildDetailRow('Creada', recommendation.formattedCreatedDate),
-              if (recommendation.expiresAt != null)
-                _buildDetailRow('Expira', recommendation.formattedExpiresAt),
-              if (recommendation.actionText != null) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Acción sugerida: ${recommendation.actionText}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontStyle: FontStyle.italic,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
+        child: Column(
+          children: [
+            // Barra de arrastre
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cerrar'),
-          ),
-          if (!recommendation.isApplied)
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _applyRecommendation(recommendation);
-              },
-              child: const Text('Aplicar'),
+              ),
             ),
-        ],
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: recommendation.typeColor.withOpacity(0.1),
+                          child: Icon(
+                            _getRecommendationIcon(recommendation.recommendationType),
+                            color: recommendation.typeColor,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            recommendation.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Detalles',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      recommendation.description,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildDetailItem('Categoría', recommendation.categoryDisplay, Icons.category_outlined),
+                    _buildDetailItem('Prioridad', recommendation.priorityDisplay, Icons.priority_high),
+                    if (recommendation.hasPotentialSavings)
+                      _buildDetailItem(
+                          'Ahorro Estimado',
+                          recommendation.formattedPotentialSavings,
+                          Icons.savings_outlined,
+                          valueColor: Colors.green
+                      ),
+
+                    const SizedBox(height: 32),
+
+                    if (recommendation.actionText != null)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.withOpacity(0.1)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Acción Sugerida',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: Colors.blue[800],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              recommendation.actionText!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.blue[900],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    const SizedBox(height: 32),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: !recommendation.isApplied
+                          ? ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _applyRecommendation(recommendation);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: recommendation.typeColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Aplicar Recomendación',
+                          style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white
+                          ),
+                        ),
+                      )
+                          : OutlinedButton.icon(
+                        onPressed: null,
+                        icon: const Icon(Icons.check),
+                        label: const Text('Ya aplicada'),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailItem(String label, String value, IconData icon, {Color? valueColor}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-          Text(
-            value,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+          Icon(icon, size: 20, color: Colors.grey[400]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                  ),
+                ),
+                Text(
+                  value,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: valueColor ?? Colors.black87,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

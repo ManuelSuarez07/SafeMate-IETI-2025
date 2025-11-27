@@ -12,6 +12,7 @@ savemate\dto\TransactionDTO.class
 savemate\service\AIService.class
 savemate\model\User$SavingType.class
 savemate\dto\AIRecommendationDTO.class
+savemate\service\AIService$1.class
 savemate\model\SavingGoal.class
 savemate\model\Transaction.class
 savemate\controller\SavingController.class

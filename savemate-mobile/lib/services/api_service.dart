@@ -353,6 +353,16 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  Future<void> generateSpendingPatternRecommendations(int userId) async {
+    try {
+      // Llama al endpoint específico que creamos en el backend
+      await _dio.post('/ai/generate/spending-patterns/$userId');
+    } on DioException catch (e) {
+      _logger.e('Generate spending pattern recommendations error: ${e.response?.data}');
+      throw _handleError(e);
+    }
+  }
+
   Future<void> generateAllRecommendations(int userId) async {
     try {
       await _dio.post('/ai/generate/all/$userId');
