@@ -1,3 +1,10 @@
+plugins {
+    // 1. Declaración del Android Gradle Plugin
+    id("com.android.application") version "8.7.3" apply false
+    // 2. Declaración del Kotlin Android Plugin (SOLUCIÓN al error 'plugin not found')
+    id("org.jetbrains.kotlin.android") version "2.1.0" apply false
+}
+
 allprojects {
     repositories {
         google()

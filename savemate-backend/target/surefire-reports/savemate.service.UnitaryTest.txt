@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: savemate.service.UnitaryTest
 -------------------------------------------------------------------------------
-Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.079 s -- in savemate.service.UnitaryTest
+Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.224 s -- in savemate.service.UnitaryTest
