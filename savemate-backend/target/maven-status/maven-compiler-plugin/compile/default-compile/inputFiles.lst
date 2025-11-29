@@ -1,34 +1,34 @@
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\dto\TransactionDTO.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\service\AIService.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\controller\SavingController.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\service\UserService.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\dto\AIRecommendationSummaryDTO.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\repository\UserRepository.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\dto\UserDTO.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\dto\SavingDTO.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\dto\TransactionSummaryDTO.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\model\SavingGoal.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\dto\SavingSummaryDTO.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\dto\AIRecommendationDTO.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\model\Transaction.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\config\JwtAuthenticationFilter.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\model\User.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\controller\UserController.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\controller\AIController.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\config\JpaConfig.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\util\NotificationParserUtils.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\controller\TransactionController.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\controller\AuthController.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\config\SecurityConfig.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\controller\HealthController.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\config\WebConfig.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\SaveMateApplication.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\repository\AIRecommendationRepository.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\repository\TransactionRepository.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\service\SavingService.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\repository\SavingRepository.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\config\JwtService.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\model\AIRecommendation.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\config\CustomUserDetailsService.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\util\RoundingUtils.java
-C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025 V2.2\savemate-backend\src\main\java\savemate\service\TransactionService.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\service\TransactionService.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\model\User.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\SaveMateApplication.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\model\Transaction.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\repository\TransactionRepository.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\dto\TransactionDTO.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\service\SavingService.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\dto\UserDTO.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\CustomUserDetailsService.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\JwtAuthenticationFilter.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\JwtService.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\model\AIRecommendation.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\controller\HealthController.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\dto\SavingDTO.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\controller\AIController.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\controller\AuthController.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\dto\TransactionSummaryDTO.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\SecurityConfig.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\WebConfig.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\repository\SavingRepository.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\util\RoundingUtils.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\repository\UserRepository.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\model\SavingGoal.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\dto\SavingSummaryDTO.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\dto\AIRecommendationDTO.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\controller\SavingController.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\dto\AIRecommendationSummaryDTO.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\repository\AIRecommendationRepository.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\util\NotificationParserUtils.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\controller\UserController.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\JpaConfig.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\service\AIService.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\service\UserService.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\controller\TransactionController.java
