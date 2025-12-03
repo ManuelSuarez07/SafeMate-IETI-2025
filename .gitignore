@@ -25,3 +25,7 @@ replay_pid*
 
 #
 *.hprof
+
+service-account-file.json
+*.json
+savemate-backend/target/
