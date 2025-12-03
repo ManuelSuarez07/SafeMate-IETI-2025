@@ -3,24 +3,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/api_service.dart';
 import 'services/notification_service.dart';
 import 'services/auth_service.dart';
-// import 'models/user.dart'; // No parece usarse aquí directamente
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Inicializar notificaciones
+  await Firebase.initializeApp();
   await NotificationService.initialize(flutterLocalNotificationsPlugin);
-
-  // Inicializar SharedPreferences
   final prefs = await SharedPreferences.getInstance();
 
   runApp(SaveMateApp(

@@ -26,31 +26,32 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final FirebaseTokenFilter firebaseTokenFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Desactivar CSRF para APIs REST
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Activar CORS explícitamente
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Permitir peticiones OPTIONS (Preflight) para CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // 2. Endpoints Públicos (Login/Registro)
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                        .requestMatchers("/api/health").permitAll()
 
-                        // 3. Endpoints Protegidos (Requieren Token)
+                        // Endpoints protegidos
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/savings/**").authenticated()
                         .requestMatchers("/api/transactions/**").authenticated()
-
-                        // 4. Cualquier otra cosa requiere autenticación
+                        .requestMatchers("/api/ai/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                // 1. Filtro de Firebase (RS256)
+                .addFilterBefore(firebaseTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                // 2. Filtro JWT Local (HS256) - Se ejecuta después si Firebase no autenticó.
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -69,7 +70,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permitir cualquier origen (*) es útil en desarrollo con Flutter/Simuladores
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));

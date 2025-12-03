@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/auth_service.dart';
-import '../models/user.dart';
+import '../models/user.dart'; // Asegúrate de que este import se use si es necesario en el widget
 import 'home_screen.dart';
 import 'register_screen.dart';
 
@@ -18,8 +18,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
+  // Usamos _isLoading localmente para controlar solo los botones de esta pantalla
   bool _isLoading = false;
 
   @override
@@ -37,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final authService = Provider.of<AuthService>(context, listen: false);
-    
+
     final success = await authService.login(
       _emailController.text.trim(),
       _passwordController.text,
@@ -61,12 +62,51 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.red,
           ),
         );
+        // Limpia el error después de mostrarlo para futuras interacciones
+        authService.clearError();
+      }
+    }
+  }
+
+  // Lógica de inicio de sesión de Google, similar a _login()
+  Future<void> _loginGoogle() async {
+    // No necesitamos validación de formulario para Google
+    setState(() => _isLoading = true);
+
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    final success = await authService.loginWithGoogle();
+
+    // Aseguramos que el estado local _isLoading se actualice al terminar
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+
+    if (success) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authService.errorMessage ?? 'Error al iniciar sesión con Google'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        authService.clearError();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Usamos el estado de carga global de AuthService para deshabilitar los botones
+    final authService = Provider.of<AuthService>(context);
+    final isAnyLoading = _isLoading || authService.isLoading;
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: SafeArea(
@@ -76,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 60),
-              
+
               // Logo y título
               Column(
                 children: [
@@ -112,9 +152,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 60),
-              
+
               // Formulario de login
               Form(
                 key: _formKey,
@@ -143,9 +183,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    
+
                     const SizedBox(height: 20),
-                    
+
                     // Campo de contraseña
                     TextFormField(
                       controller: _passwordController,
@@ -179,14 +219,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
+
                     // Olvidé mi contraseña
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
+                        onPressed: isAnyLoading ? null : () {
                           // TODO: Implementar recuperación de contraseña
                         },
                         child: Text(
@@ -197,38 +237,34 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 30),
-                    
+
                     // Botón de login
-                    Consumer<AuthService>(
-                      builder: (context, authService, child) {
-                        return SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: (_isLoading || authService.isLoading) ? null : _login,
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: (_isLoading || authService.isLoading)
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : Text(
-                                    'Iniciar Sesión',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: isAnyLoading ? null : _login,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      },
+                        ),
+                        child: isAnyLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : Text(
+                          'Iniciar Sesión',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
-                    
-                    const SizedBox(height: 30),
-                    
+
+                    const SizedBox(height: 30), // Espacio antes del separador
+
                     // Separador
                     Row(
                       children: [
@@ -243,15 +279,57 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Expanded(child: Divider()),
                       ],
                     ),
-                    
+
+                    const SizedBox(height: 20), // Espacio después del separador
+
+                    // === INICIO DE LA ADICIÓN: Botón de Google ===
+                    Consumer<AuthService>(
+                      builder: (context, authService, child) {
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: OutlinedButton.icon(
+                            // Deshabilitar si _isLoading o authService.isLoading es true
+                            onPressed: isAnyLoading ? null : _loginGoogle,
+
+                            icon: Image.network(
+                              'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
+                              height: 24,
+                              // Fallback si la imagen no carga
+                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.login),
+                            ),
+                            label: Text(
+                              'Continuar con Google',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: const BorderSide(
+                                color: Colors.grey, // Borde gris claro para destacar
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    // === FIN DE LA ADICIÓN ===
+
                     const SizedBox(height: 30),
-                    
+
                     // Botón de registro
                     SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: OutlinedButton(
-                        onPressed: () {
+                        onPressed: isAnyLoading ? null : () {
                           Navigator.of(context).push(
                             MaterialPageRoute(builder: (context) => const RegisterScreen()),
                           );
@@ -278,9 +356,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Footer
               Column(
                 children: [

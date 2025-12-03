@@ -11,7 +11,7 @@ class ApiService with ChangeNotifier {
   // Asegúrate de usar la IP correcta para tu emulador/dispositivo
   // Emulador Android: 10.0.2.2
   // iOS / Dispositivo Físico: Tu IP local (ej: 192.168.1.X)
-  static const String baseUrl = 'http://10.0.2.2:8080/api';
+  static const String baseUrl = 'http://34.123.185.74:8080/api';
 
   final Dio _dio = Dio();
   final Logger _logger = Logger();

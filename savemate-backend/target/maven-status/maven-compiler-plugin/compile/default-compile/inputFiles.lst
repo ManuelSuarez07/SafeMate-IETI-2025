@@ -10,11 +10,13 @@ C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\jav
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\JwtAuthenticationFilter.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\JwtService.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\model\AIRecommendation.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\FirebaseConfig.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\controller\HealthController.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\dto\SavingDTO.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\controller\AIController.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\controller\AuthController.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\dto\TransactionSummaryDTO.java
+C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\FirebaseTokenFilter.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\SecurityConfig.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\config\WebConfig.java
 C:\Users\manue\OneDrive\Desktop\SafeMate-IETI-2025\savemate-backend\src\main\java\savemate\repository\SavingRepository.java

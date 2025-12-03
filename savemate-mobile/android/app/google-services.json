@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "591321023670",
+    "project_id": "savemate-2f7bc",
+    "storage_bucket": "savemate-2f7bc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591321023670:android:b1dc5fc8917f886a50d217",
+        "android_client_info": {
+          "package_name": "com.example.savemate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "591321023670-lsccddo01e6rrn5ldnk369fbaoe07ate.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6DnPcITBqBaiMAcsC92FeeqSoeRiKXPY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "591321023670-lsccddo01e6rrn5ldnk369fbaoe07ate.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
