@@ -15,6 +15,13 @@ import 'profile_screen.dart';
 import 'deposit_screen.dart';
 import 'withdraw_screen.dart';
 
+/// Pantalla principal (Dashboard) de la aplicación que orquesta la navegación global.
+///
+/// Responsabilidades principales:
+/// 1. Actuar como el contenedor raíz (`Scaffold`) que gestiona el [BottomNavigationBar] y el [PageView].
+/// 2. Coordinar la navegación entre los módulos principales: Inicio, Transacciones, Ahorros, IA y Perfil.
+/// 3. Cargar y visualizar un resumen ejecutivo ("Home Tab") con el estado financiero actual del [User],
+///    incluyendo saldo total, metas activas y transacciones recientes.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -47,6 +54,17 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  /// Carga y actualiza los datos financieros mostrados en el Dashboard.
+  ///
+  /// Realiza múltiples peticiones HTTP a través de [ApiService] para obtener:
+  /// - Datos actualizados del usuario ([getUserById]).
+  /// - Historial de transacciones ([getTransactionsByUserId]), ordenadas cronológicamente.
+  /// - Metas de ahorro activas ([getActiveSavingGoals]).
+  /// - Recomendaciones de inteligencia artificial ([getActiveRecommendations]).
+  ///
+  /// Actualiza el estado local ([_recentTransactions], [_activeGoals], etc.) y
+  /// refresca la información en [AuthService].
+  /// Retorna un [Future<void>].
   Future<void> _loadData() async {
     if (!mounted) return;
     setState(() {
@@ -99,6 +117,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// Gestiona la navegación programática entre las pestañas inferiores.
+  ///
+  /// Permite saltar a una pestaña específica y opcionalmente ejecutar una acción
+  /// posterior (deep linking interno), como abrir un diálogo de creación.
+  ///
+  /// [index]: Índice de la pestaña destino (0: Inicio, 1: Transacciones, etc.).
+  /// [action]: Callback opcional a ejecutar tras la navegación.
   void _navigateToTab(int index, {VoidCallback? action}) {
     setState(() {
       _currentIndex = index;
@@ -154,6 +179,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Construye la vista de la pestaña "Inicio" (Dashboard).
+  ///
+  /// Combina múltiples widgets de resumen:
+  /// - [_buildHeader]: Saludo y notificaciones.
+  /// - [_buildSavingsCard]: Tarjeta principal de saldo.
+  /// - [_buildQuickActions]: Accesos directos a operaciones comunes.
+  /// - [_buildActiveGoals]: Resumen de metas de ahorro.
+  /// - [_buildRecentTransactions]: Listado corto de movimientos.
+  /// - [_buildRecommendations]: Insights rápidos de IA.
   Widget _buildHomeTab() {
     return Consumer<AuthService>(
       builder: (context, authService, child) {
@@ -316,6 +350,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Construye la sección de acciones rápidas.
+  ///
+  /// Utiliza [_navigateToTab] para redirigir al usuario a secciones específicas
+  /// y abrir diálogos (ej. "Añadir Transacción" navega a Tab 1 y abre el modal).
   Widget _buildQuickActions() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

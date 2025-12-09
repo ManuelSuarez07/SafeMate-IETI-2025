@@ -8,6 +8,13 @@ import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import 'bank_account_screen.dart';
 
+/// Pantalla para realizar recargas de saldo o depósitos a la cuenta de ahorros.
+///
+/// Esta clase es responsable de:
+/// 1. Verificar si el usuario tiene una cuenta bancaria vinculada antes de permitir la operación.
+/// 2. Proporcionar una interfaz para ingresar el monto a transferir.
+/// 3. Ejecutar una simulación visual de conexión bancaria para mejorar la experiencia de usuario (UX).
+/// 4. Procesar la transacción real comunicándose con el backend.
 class DepositScreen extends StatefulWidget {
   const DepositScreen({Key? key}) : super(key: key);
 
@@ -29,6 +36,11 @@ class _DepositScreenState extends State<DepositScreen> {
     'Finalizando operación...'
   ];
 
+  /// Inicializa el estado y verifica prerrequisitos.
+  ///
+  /// Utiliza [WidgetsBinding.instance.addPostFrameCallback] para verificar
+  /// si el [User] actual tiene una [bankAccount] válida. Si no la tiene,
+  /// invoca [_showNoAccountDialog] inmediatamente después de construir la UI.
   @override
   void initState() {
     super.initState();
@@ -41,6 +53,11 @@ class _DepositScreenState extends State<DepositScreen> {
     });
   }
 
+  /// Muestra un diálogo modal bloqueante si el usuario no tiene cuenta bancaria.
+  ///
+  /// Ofrece dos acciones:
+  /// - Cancelar: Cierra la pantalla de depósito.
+  /// - Vincular Ahora: Redirige al usuario a [BankAccountScreen].
   void _showNoAccountDialog() {
     showDialog(
       context: context,
@@ -71,6 +88,18 @@ class _DepositScreenState extends State<DepositScreen> {
     );
   }
 
+  /// Gestiona el flujo completo de la transacción de depósito.
+  ///
+  /// Flujo de ejecución:
+  /// 1. Valida que el monto ingresado en [_amountController] sea numérico y positivo.
+  /// 2. Activa el modo de simulación ([_isSimulating] = true).
+  /// 3. Itera sobre [_simulationSteps] añadiendo retardos artificiales para simular
+  ///    una conexión bancaria segura.
+  /// 4. Realiza la llamada HTTP real mediante [ApiService.createSavingDeposit], enviando
+  ///    el [userId] y el [amount].
+  /// 5. Muestra un diálogo de éxito o un mensaje de error según el resultado.
+  ///
+  /// Retorna un [Future<void>].
   Future<void> _processDeposit() async {
     if (_amountController.text.isEmpty) return;
 
@@ -124,6 +153,9 @@ class _DepositScreenState extends State<DepositScreen> {
     }
   }
 
+  /// Muestra un diálogo de confirmación tras una transacción exitosa.
+  ///
+  /// Muestra el monto recargado y cierra la pantalla actual al presionar "Entendido".
   void _showSuccessDialog(double amount) {
     showDialog(
       context: context,
@@ -184,7 +216,13 @@ class _DepositScreenState extends State<DepositScreen> {
     );
   }
 
-  // Vista de Entrada de Datos
+  /// Construye la vista de formulario para el ingreso de datos.
+  ///
+  /// Muestra:
+  /// - Tarjeta con información de la cuenta bancaria origen.
+  /// - Input grande para el monto.
+  /// - Botones de selección rápida de monto mediante [_quickAmountButton].
+  /// - Botón principal para iniciar [_processDeposit].
   Widget _buildInputView(String bankName, String accountNumber) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -290,6 +328,7 @@ class _DepositScreenState extends State<DepositScreen> {
     );
   }
 
+  /// Crea un botón para establecer rápidamente un monto en el controlador.
   Widget _quickAmountButton(double amount) {
     return OutlinedButton(
       onPressed: () => _amountController.text = amount.toStringAsFixed(0),
@@ -300,7 +339,11 @@ class _DepositScreenState extends State<DepositScreen> {
     );
   }
 
-  // Vista de Simulación
+  /// Construye la vista de carga/simulación.
+  ///
+  /// Muestra indicadores de progreso y mensajes de estado dinámicos
+  /// basados en [_simulationStatus] para informar al usuario sobre
+  /// el progreso de la transacción bancaria.
   Widget _buildSimulationView(String bankName) {
     return Container(
       width: double.infinity,

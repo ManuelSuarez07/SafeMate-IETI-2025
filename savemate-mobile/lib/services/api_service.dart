@@ -7,7 +7,20 @@ import '../models/transaction.dart';
 import '../models/saving.dart';
 import '../models/ai_recommendation.dart';
 
+/// Servicio central encargado de gestionar todas las comunicaciones HTTP con el backend.
+///
+/// Esta clase actúa como una capa de abstracción sobre [Dio] para realizar peticiones REST.
+/// Utiliza el mixin [ChangeNotifier] para notificar a los widgets escuchas (vía Provider)
+/// sobre cambios en el estado de autenticación o actualizaciones del usuario actual.
+///
+/// Responsabilidades principales:
+/// 1. Gestión de autenticación (Login, Logout, Refresh Token).
+/// 2. Inyección automática del token JWT en las cabeceras mediante interceptores.
+/// 3. Operaciones CRUD para [User], [Transaction] y [Saving].
+/// 4. Comunicación con los endpoints de Inteligencia Artificial.
+/// 5. Manejo centralizado de errores de red ([DioException]).
 class ApiService with ChangeNotifier {
+  /// URL base del servidor backend.
   static const String baseUrl = 'http://34.123.185.74:8080/api';
 
   final Dio _dio = Dio();
@@ -16,6 +29,11 @@ class ApiService with ChangeNotifier {
   String? _accessToken;
   User? _currentUser;
 
+  /// Configura el cliente HTTP [Dio] con tiempos de espera e interceptores.
+  ///
+  /// Los interceptores se encargan de:
+  /// - Agregar el encabezado `Authorization: Bearer ...` si existe un token.
+  /// - Loguear las peticiones, respuestas y errores para depuración.
   ApiService() {
     _dio.options.baseUrl = baseUrl;
     _dio.options.connectTimeout = const Duration(seconds: 10);
@@ -44,10 +62,21 @@ class ApiService with ChangeNotifier {
   // Getters
   String? get accessToken => _accessToken;
   User? get currentUser => _currentUser;
+
+  /// Retorna `true` si el servicio tiene un token y un usuario cargado en memoria.
   bool get isAuthenticated => _accessToken != null && _currentUser != null;
 
   // --- AUTENTICACIÓN ---
 
+  /// Autentica al usuario en el sistema.
+  ///
+  /// Realiza una petición `POST /auth/login`.
+  ///
+  /// [email]: Correo electrónico del usuario.
+  /// [password]: Contraseña en texto plano.
+  ///
+  /// Retorna un [Future] con el mapa de respuesta que contiene el token.
+  /// Notifica a los oyentes tras un inicio de sesión exitoso.
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await _dio.post('/auth/login', data: {
@@ -66,12 +95,20 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Cierra la sesión del usuario localmente.
+  ///
+  /// Limpia el [_accessToken] y el [_currentUser], y notifica a los oyentes
+  /// para que la UI redirija a la pantalla de login.
   Future<void> logout() async {
     _accessToken = null;
     _currentUser = null;
     notifyListeners();
   }
 
+  /// Renueva el token de acceso utilizando un token de refresco.
+  ///
+  /// Realiza una petición `POST /auth/refresh`.
+  /// Actualiza el [_accessToken] interno y notifica a los oyentes.
   Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
     try {
       final response = await _dio.post('/auth/refresh', data: {
@@ -91,6 +128,14 @@ class ApiService with ChangeNotifier {
 
   // --- USUARIOS ---
 
+  /// Registra un nuevo usuario en la base de datos.
+  ///
+  /// Realiza una petición `POST /users`.
+  ///
+  /// [user]: Objeto [User] con los datos básicos.
+  /// [password]: Contraseña deseada para la cuenta.
+  ///
+  /// Retorna el [User] creado y lo establece como el usuario actual.
   Future<User> createUser(User user, String password) async {
     try {
       final Map<String, dynamic> userMap = user.toJson();
@@ -109,6 +154,9 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Obtiene los detalles de un usuario específico.
+  ///
+  /// Realiza una petición `GET /users/$id`.
   Future<User> getUserById(int id) async {
     try {
       final response = await _dio.get('/users/$id');
@@ -119,6 +167,10 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Actualiza la información básica del perfil de un usuario.
+  ///
+  /// Realiza una petición `PUT /users/$id`.
+  /// Si el usuario actualizado es el actual, refresca el estado local.
   Future<User> updateUser(int id, User user) async {
     try {
       final response = await _dio.put('/users/$id', data: user.toJson());
@@ -136,6 +188,9 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Actualiza la configuración de ahorro del usuario (tipo, redondeo, porcentajes).
+  ///
+  /// Realiza una petición `PUT /users/$id/saving-config`.
   Future<User> updateSavingConfiguration(int id, Map<String, dynamic> config) async {
     try {
       final response = await _dio.put('/users/$id/saving-config', data: config);
@@ -153,7 +208,9 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // Metodo para vincular cuenta Bancaria
+  /// Vincula los datos de una cuenta bancaria externa al perfil del usuario.
+  ///
+  /// Realiza una petición `PUT /users/$userId/bank-account`.
   Future<User> linkBankAccount(int userId, String bankAccount, String bankName) async {
     try {
       final response = await _dio.put('/users/$userId/bank-account', data: {
@@ -177,6 +234,9 @@ class ApiService with ChangeNotifier {
 
   // --- TRANSACCIONES ---
 
+  /// Crea una nueva transacción (gasto o ingreso) manual.
+  ///
+  /// Realiza una petición `POST /transactions`.
   Future<Transaction> createTransaction(Transaction transaction) async {
     try {
       final response = await _dio.post('/transactions', data: transaction.toJson());
@@ -187,7 +247,12 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // Metodo para deposito simulado
+  /// Realiza un depósito simulado para recargar el saldo de ahorros.
+  ///
+  /// Realiza una petición `POST /transactions/saving-deposit`.
+  ///
+  /// Efecto secundario: Actualiza los datos del usuario local (para refrescar el saldo total)
+  /// llamando internamente a [getUserById].
   Future<Transaction> createSavingDeposit({
     required int userId,
     required double amount,
@@ -212,6 +277,11 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Procesa el retiro de fondos de la cuenta de ahorros hacia la cuenta bancaria.
+  ///
+  /// Realiza una petición `POST /transactions/withdraw`.
+  ///
+  /// Efecto secundario: Actualiza el saldo del usuario localmente.
   Future<Transaction> withdrawFunds({
     required int userId,
     required double amount,
@@ -236,7 +306,10 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // Metodo para procesar notificaciones (TODO)
+  /// Crea una transacción basada en datos parseados de notificaciones bancarias.
+  ///
+  /// Realiza una petición `POST /transactions/from-notification`.
+  /// Útil para integraciones automáticas mediante lectura de SMS o Push.
   Future<Transaction> processTransactionFromNotification({
     required int userId,
     required double amount,
@@ -265,6 +338,9 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Obtiene el historial completo de transacciones de un usuario.
+  ///
+  /// Realiza una petición `GET /transactions/user/$userId`.
   Future<List<Transaction>> getTransactionsByUserId(int userId) async {
     try {
       final response = await _dio.get('/transactions/user/$userId');
@@ -276,6 +352,9 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Obtiene transacciones filtradas por tipo (Gasto, Ingreso, Ahorro).
+  ///
+  /// Realiza una petición `GET /transactions/user/$userId/type/$type`.
   Future<List<Transaction>> getTransactionsByUserIdAndType(int userId, TransactionType type) async {
     try {
       final response = await _dio.get('/transactions/user/$userId/type/${type.name}');
@@ -289,6 +368,9 @@ class ApiService with ChangeNotifier {
 
   // --- AHORROS (METAS) ---
 
+  /// Crea una nueva meta de ahorro.
+  ///
+  /// Realiza una petición `POST /savings`.
   Future<Saving> createSavingGoal(Saving saving) async {
     try {
       final response = await _dio.post('/savings', data: saving.toJson());
@@ -299,6 +381,10 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Actualiza el progreso monetario de una meta específica.
+  ///
+  /// Realiza una petición `PUT /savings/$id/progress`.
+  /// Se usa para añadir fondos manualmente a una meta.
   Future<Saving> updateSavingGoalProgress(int id, double amount) async {
     try {
       final response = await _dio.put('/savings/$id/progress', data: {
@@ -311,6 +397,9 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Obtiene todas las metas de ahorro de un usuario.
+  ///
+  /// Realiza una petición `GET /savings/user/$userId`.
   Future<List<Saving>> getSavingGoalsByUserId(int userId) async {
     try {
       final response = await _dio.get('/savings/user/$userId');
@@ -322,6 +411,9 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Obtiene únicamente las metas de ahorro que están activas (no completadas).
+  ///
+  /// Realiza una petición `GET /savings/user/$userId/active`.
   Future<List<Saving>> getActiveSavingGoals(int userId) async {
     try {
       final response = await _dio.get('/savings/user/$userId/active');
@@ -335,6 +427,9 @@ class ApiService with ChangeNotifier {
 
   // --- IA / RECOMENDACIONES ---
 
+  /// Obtiene las recomendaciones de IA activas para el usuario.
+  ///
+  /// Realiza una petición `GET /ai/user/$userId/active`.
   Future<List<AIRecommendation>> getActiveRecommendations(int userId) async {
     try {
       final response = await _dio.get('/ai/user/$userId/active');
@@ -346,6 +441,10 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Solicita al backend generar recomendaciones basadas en patrones de gasto.
+  ///
+  /// Realiza una petición `POST /ai/generate/spending-patterns/$userId`.
+  /// Esta operación puede ser costosa, por lo que el backend podría procesarla asíncronamente.
   Future<void> generateSpendingPatternRecommendations(int userId) async {
     try {
       await _dio.post('/ai/generate/spending-patterns/$userId');
@@ -355,6 +454,9 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Solicita la generación de todo tipo de recomendaciones de IA.
+  ///
+  /// Realiza una petición `POST /ai/generate/all/$userId`.
   Future<void> generateAllRecommendations(int userId) async {
     try {
       await _dio.post('/ai/generate/all/$userId');
@@ -364,6 +466,10 @@ class ApiService with ChangeNotifier {
     }
   }
 
+  /// Marca una recomendación como "aplicada" o ejecutada por el usuario.
+  ///
+  /// Realiza una petición `PUT /ai/apply/$recommendationId`.
+  /// Retorna el objeto [AIRecommendation] actualizado.
   Future<AIRecommendation> applyRecommendation(int recommendationId) async {
     try {
       final response = await _dio.put('/ai/apply/$recommendationId');
@@ -376,16 +482,19 @@ class ApiService with ChangeNotifier {
 
   // --- UTILIDADES ---
 
+  /// Actualiza manualmente el token de acceso y notifica a los oyentes.
   void setToken(String token) {
     _accessToken = token;
     notifyListeners();
   }
 
+  /// Actualiza manualmente el usuario actual y notifica a los oyentes.
   void setCurrentUser(User user) {
     _currentUser = user;
     notifyListeners();
   }
 
+  /// Transforma errores de [DioException] en mensajes de texto amigables para el usuario.
   String _handleError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:

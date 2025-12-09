@@ -7,6 +7,14 @@ import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../models/saving.dart';
 
+/// Pantalla principal para la gestión y visualización de las metas de ahorro del usuario.
+///
+/// Esta clase es responsable de:
+/// 1. Listar todas las metas de ahorro (activas y completadas).
+/// 2. Mostrar un resumen financiero con el total ahorrado y el progreso global.
+/// 3. Permitir la creación de nuevas metas mediante [AddSavingGoalDialog].
+/// 4. Permitir añadir fondos a una meta existente o ver sus detalles.
+/// 5. Ofrecer acceso a estadísticas detalladas mediante [SavingsStatisticsDialog].
 class SavingsScreen extends StatefulWidget {
   const SavingsScreen({Key? key}) : super(key: key);
 
@@ -26,6 +34,12 @@ class SavingsScreenState extends State<SavingsScreen> {
     _loadGoals();
   }
 
+  /// Carga las metas de ahorro del usuario desde el backend.
+  ///
+  /// Utiliza [ApiService.getSavingGoalsByUserId] realizando una petición HTTP GET.
+  /// Clasifica las metas obtenidas en [_activeGoals] y [_completedGoals] según su estado.
+  ///
+  /// Retorna un [Future<void>] y actualiza el estado de la UI.
   Future<void> _loadGoals() async {
     if (!mounted) return;
     setState(() {
@@ -120,6 +134,12 @@ class SavingsScreenState extends State<SavingsScreen> {
     );
   }
 
+  /// Construye la tarjeta de resumen superior.
+  ///
+  /// Calcula y muestra:
+  /// - Total ahorrado sumando el [Saving.currentAmount] de todas las metas.
+  /// - Meta total sumando el [Saving.targetAmount].
+  /// - Barra de progreso general.
   Widget _buildSummaryCard() {
     final totalSaved = _allGoals.fold<double>(0, (sum, goal) => sum + goal.currentAmount);
     final totalTarget = _allGoals.fold<double>(0, (sum, goal) => sum + goal.targetAmount);
@@ -304,6 +324,10 @@ class SavingsScreenState extends State<SavingsScreen> {
     );
   }
 
+  /// Construye una tarjeta visual para una meta de ahorro individual.
+  ///
+  /// Muestra nombre, progreso visual (barra), estado (vencida/activa),
+  /// y botones de acción para añadir dinero o ver detalles.
   Widget _buildGoalCard(Saving goal) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -505,6 +529,10 @@ class SavingsScreenState extends State<SavingsScreen> {
 
   // --- MÉTODOS PÚBLICOS Y DIÁLOGOS ---
 
+  /// Muestra el diálogo para crear una nueva meta de ahorro.
+  ///
+  /// Abre [AddSavingGoalDialog]. Si se crea la meta exitosamente,
+  /// recarga la lista llamando a [_loadGoals].
   void showAddGoalDialog() {
     showDialog(
       context: context,
@@ -516,6 +544,10 @@ class SavingsScreenState extends State<SavingsScreen> {
     });
   }
 
+  /// Muestra un diálogo para ingresar un monto y agregarlo al progreso de la meta.
+  ///
+  /// Recibe la meta [goal] seleccionada.
+  /// Al confirmar, llama a [_addAmountToGoal].
   void _showAddAmountDialog(Saving goal) {
     final controller = TextEditingController();
 
@@ -569,6 +601,13 @@ class SavingsScreenState extends State<SavingsScreen> {
     );
   }
 
+  /// Actualiza el progreso de una meta específica en el servidor.
+  ///
+  /// Realiza una llamada al endpoint de actualización mediante [ApiService.updateSavingGoalProgress].
+  /// Recibe el [goal] y el [amount] a adicionar.
+  ///
+  /// Muestra feedback visual y recarga la lista de metas tras el éxito.
+  /// Retorna un [Future<void>].
   Future<void> _addAmountToGoal(Saving goal, double amount) async {
     try {
       final apiService = Provider.of<ApiService>(context, listen: false);
@@ -595,6 +634,7 @@ class SavingsScreenState extends State<SavingsScreen> {
     }
   }
 
+  /// Muestra un modal con los detalles completos de una meta.
   void _showGoalDetails(Saving goal) {
     showDialog(
       context: context,
@@ -667,6 +707,10 @@ class SavingsScreenState extends State<SavingsScreen> {
     );
   }
 
+  /// Muestra el diálogo de estadísticas de ahorro.
+  ///
+  /// Abre [SavingsStatisticsDialog] pasando las listas de metas actuales
+  /// para calcular y visualizar el rendimiento del usuario.
   void showStatistics() {
     showDialog(
       context: context,
@@ -681,6 +725,7 @@ class SavingsScreenState extends State<SavingsScreen> {
 
 // WIDGETS AUXILIARES
 
+/// Diálogo modal que contiene el formulario para crear una nueva meta de ahorro.
 class AddSavingGoalDialog extends StatefulWidget {
   const AddSavingGoalDialog({Key? key}) : super(key: key);
 
@@ -731,6 +776,11 @@ class _AddSavingGoalDialogState extends State<AddSavingGoalDialog> {
     }
   }
 
+  /// Valida el formulario y envía la petición de creación.
+  ///
+  /// Llama a [ApiService.createSavingGoal] enviando un nuevo objeto [Saving].
+  /// Gestiona errores y muestra notificaciones al usuario.
+  /// Retorna un [Future<void>].
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -900,6 +950,7 @@ class _AddSavingGoalDialogState extends State<AddSavingGoalDialog> {
   }
 }
 
+/// Diálogo informativo que visualiza métricas de las metas del usuario.
 class SavingsStatisticsDialog extends StatelessWidget {
   final List<Saving> allGoals;
   final List<Saving> activeGoals;

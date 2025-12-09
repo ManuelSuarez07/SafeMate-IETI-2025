@@ -7,6 +7,13 @@ import '../models/user.dart';
 import 'login_screen.dart';
 import 'bank_account_screen.dart';
 
+/// Pantalla de gestión de perfil y configuración de usuario.
+///
+/// Esta clase es responsable de:
+/// 1. Visualizar la información personal del usuario y permitir su edición.
+/// 2. Configurar las reglas de negocio para el ahorro automático (tipo de ahorro, redondeo, porcentajes).
+/// 3. Gestionar la vinculación con la cuenta bancaria (navegación a [BankAccountScreen]).
+/// 4. Proporcionar la funcionalidad de cierre de sesión.
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -48,6 +55,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  /// Sincroniza los controladores locales con los datos del [User] actual.
+  ///
+  /// Obtiene la instancia de [User] desde [AuthService] y puebla los campos
+  /// de texto y las variables de estado de configuración (tipo de ahorro, redondeo, etc.)
+  /// para reflejar el estado actual en la interfaz.
   void _loadUserData() {
     final authService = Provider.of<AuthService>(context, listen: false);
     final user = authService.user;
@@ -67,6 +79,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  /// Guarda los cambios realizados en la información personal del usuario.
+  ///
+  /// Crea una nueva instancia de [User] con los datos modificados en los controladores
+  /// y realiza una llamada HTTP mediante [AuthService.updateProfile].
+  ///
+  /// Muestra feedback visual (SnackBars) de éxito o error y actualiza el estado de la UI.
+  /// Retorna un [Future<void>].
   Future<void> _saveProfile() async {
     setState(() => _isLoading = true);
     try {
@@ -112,6 +131,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  /// Actualiza la configuración de las reglas de ahorro automático.
+  ///
+  /// Envía los parámetros seleccionados (tipo, porcentaje, saldo mínimo) al backend
+  /// mediante [AuthService.updateSavingConfiguration].
+  ///
+  /// Retorna un [Future<void>].
   Future<void> _saveSavingConfig() async {
     setState(() => _isLoading = true);
     try {
@@ -541,6 +566,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  /// Cierra la sesión del usuario actual.
+  ///
+  /// Muestra un diálogo de confirmación y, si el usuario confirma,
+  /// llama a [AuthService.logout] y redirige a [LoginScreen],
+  /// eliminando todo el historial de navegación anterior.
   void _logout() {
     showDialog(
       context: context,

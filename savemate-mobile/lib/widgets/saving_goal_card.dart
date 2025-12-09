@@ -3,11 +3,27 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../models/saving.dart';
 
+/// Widget que representa visualmente una tarjeta detallada para una meta de ahorro [Saving].
+///
+/// Esta clase es responsable de:
+/// 1. Mostrar el progreso actual de la meta mediante barras y porcentajes.
+/// 2. Visualizar el estado de la meta (Activa, Completada, Vencida) mediante colores y gradientes dinámicos.
+/// 3. Proveer botones de acción rápida para añadir fondos ([onAddAmount]) o ver detalles ([onEdit]).
+/// 4. Adaptar su diseño visual basado en la prioridad y el estado de la meta.
 class SavingGoalCard extends StatelessWidget {
+  /// La meta de ahorro a visualizar.
   final Saving goal;
+
+  /// Callback que se ejecuta al tocar la tarjeta completa.
   final VoidCallback? onTap;
+
+  /// Callback para la acción de añadir fondos rápidamente.
   final VoidCallback? onAddAmount;
+
+  /// Callback para la acción de editar o ver detalles completos.
   final VoidCallback? onEdit;
+
+  /// Determina si se deben mostrar los botones de acción en la parte inferior.
   final bool showActions;
 
   const SavingGoalCard({
@@ -102,9 +118,9 @@ class SavingGoalCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Progreso
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,13 +175,13 @@ class SavingGoalCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               // Información adicional
               if (_showAdditionalInfo(goal)) ...[
                 const SizedBox(height: 16),
                 _buildAdditionalInfo(goal),
               ],
-              
+
               // Acciones
               if (showActions && goal.status == GoalStatus.active) ...[
                 const SizedBox(height: 16),
@@ -223,6 +239,10 @@ class SavingGoalCard extends StatelessWidget {
     );
   }
 
+  /// Construye la sección de información adicional si existen datos relevantes.
+  ///
+  /// Muestra alertas visuales si la meta está vencida ([goal.isOverdue]) o
+  /// muestra la fecha de vencimiento y la contribución mensual sugerida.
   Widget _buildAdditionalInfo(Saving goal) {
     if (goal.targetDate != null) {
       return Container(
@@ -240,7 +260,7 @@ class SavingGoalCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              goal.isOverdue 
+              goal.isOverdue
                   ? 'Meta vencida'
                   : 'Vence: ${goal.daysRemainingDisplay}',
               style: GoogleFonts.poppins(
@@ -263,10 +283,18 @@ class SavingGoalCard extends StatelessWidget {
         ),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
 
+  /// Determina el gradiente de fondo de la tarjeta basado en el [GoalStatus] y estado de la meta.
+  ///
+  /// Retorna:
+  /// - Verde: Si la meta está completada.
+  /// - Naranja: Si la meta está activa pero vencida.
+  /// - Color Primario (variable): Si la meta está activa y a tiempo.
+  /// - Gris: Si la meta está pausada.
+  /// - Rojo: Si la meta está cancelada.
   LinearGradient _getCardGradient() {
     switch (goal.status) {
       case GoalStatus.completed:
@@ -303,6 +331,9 @@ class SavingGoalCard extends StatelessWidget {
     }
   }
 
+  /// Retorna el color primario visual basado en el nivel de prioridad ([Saving.priorityLevel]).
+  ///
+  /// Usado para determinar el color base del gradiente en metas activas.
   Color _getPrimaryColor() {
     switch (goal.priorityLevel) {
       case 5:
@@ -324,7 +355,15 @@ class SavingGoalCard extends StatelessWidget {
   }
 }
 
-// Widget para tarjetas compactas de metas
+/// Versión compacta y resumida de la tarjeta de meta de ahorro.
+///
+/// Ideal para listas donde el espacio vertical es limitado o para mostrar
+/// un resumen rápido del progreso.
+///
+/// Muestra:
+/// - Nombre de la meta.
+/// - Porcentaje de progreso (Badge y Barra lineal).
+/// - Monto actual y meta total.
 class CompactSavingGoalCard extends StatelessWidget {
   final Saving goal;
   final VoidCallback? onTap;
@@ -395,18 +434,18 @@ class CompactSavingGoalCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 LinearProgressIndicator(
                   value: goal.progressPercentage / 100,
                   backgroundColor: Colors.grey[200],
                   valueColor: AlwaysStoppedAnimation<Color>(goal.statusColor),
                   minHeight: 4,
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

@@ -7,6 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:telephony/telephony.dart';
 import 'api_service.dart';
 
+/// Servicio singleton encargado de la gestión de notificaciones locales y la lectura de SMS.
+///
+/// Sus responsabilidades principales son:
+/// 1. Inicializar el plugin de notificaciones locales para Android e iOS.
+/// 2. Solicitar y gestionar permisos del sistema (Notificaciones y SMS).
+/// 3. Escuchar mensajes SMS entrantes en segundo plano para detectar transacciones bancarias.
+/// 4. Parsear el contenido de los SMS y enviarlos al backend a través de [ApiService].
+/// 5. Mostrar notificaciones visuales al usuario (ahorros, metas cumplidas, etc.).
 class NotificationService with ChangeNotifier {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -27,12 +35,21 @@ class NotificationService with ChangeNotifier {
   bool get hasSmsPermission => _hasSmsPermission;
   bool get hasNotificationPermission => _hasNotificationPermission;
 
+  /// Inyecta la dependencia de [ApiService] necesaria para procesar transacciones.
+  ///
+  /// Debe llamarse antes de que el servicio intente procesar cualquier SMS,
+  /// generalmente al inicio de la aplicación o después del login.
   void setApiService(ApiService service) {
     _apiService = service;
     _logger.i('ApiService inyectado en NotificationService');
   }
 
   // Inicialización
+
+  /// Punto de entrada estático para inicializar el servicio.
+  ///
+  /// Configura los ajustes específicos de cada plataforma (iconos para Android, permisos para iOS)
+  /// y solicita los permisos iniciales.
   static Future<void> initialize(FlutterLocalNotificationsPlugin plugin) async {
     final instance = NotificationService._instance;
     instance._flutterLocalNotificationsPlugin.initialize(
@@ -82,6 +99,11 @@ class NotificationService with ChangeNotifier {
   }
 
   // Permisos
+
+  /// Solicita los permisos necesarios al sistema operativo.
+  ///
+  /// Pide permiso para mostrar notificaciones y para leer SMS.
+  /// Actualiza los estados [_hasNotificationPermission] y [_hasSmsPermission].
   Future<void> _requestPermissions() async {
     try {
       // Permisos de notificación
@@ -103,6 +125,12 @@ class NotificationService with ChangeNotifier {
     }
   }
 
+  /// Solicita explícitamente el permiso de lectura de SMS.
+  ///
+  /// Si el permiso es concedido, inicia inmediatamente el listener de SMS
+  /// mediante [_startSmsListener].
+  ///
+  /// Retorna `true` si el permiso fue concedido.
   Future<bool> requestSmsPermission() async {
     try {
       final status = await Permission.sms.request();
@@ -121,6 +149,13 @@ class NotificationService with ChangeNotifier {
   }
 
   // Notificaciones locales
+
+  /// Muestra una notificación local genérica.
+  ///
+  /// [id]: Identificador único de la notificación.
+  /// [title]: Título visible.
+  /// [body]: Contenido del mensaje.
+  /// [payload]: Datos opcionales para manejar la acción al tocar la notificación.
   Future<void> showNotification({
     required int id,
     required String title,
@@ -164,6 +199,7 @@ class NotificationService with ChangeNotifier {
     }
   }
 
+  /// Muestra una notificación específica cuando se detecta un ahorro automático.
   Future<void> showSavingNotification({
     required double amount,
     required String merchant,
@@ -176,6 +212,7 @@ class NotificationService with ChangeNotifier {
     );
   }
 
+  /// Muestra una notificación cuando el usuario completa una meta de ahorro.
   Future<void> showGoalCompletedNotification(String goalName) async {
     await showNotification(
       id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
@@ -185,6 +222,7 @@ class NotificationService with ChangeNotifier {
     );
   }
 
+  /// Muestra una notificación con una recomendación generada por la IA.
   Future<void> showRecommendationNotification(String recommendationTitle) async {
     await showNotification(
       id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
@@ -195,6 +233,11 @@ class NotificationService with ChangeNotifier {
   }
 
 // SMS Listener con TELEPHONY
+
+  /// Inicia la escucha de SMS entrantes utilizando el paquete `Telephony`.
+  ///
+  /// Configura un callback que se ejecuta cada vez que llega un mensaje.
+  /// Si el cuerpo del mensaje no es nulo, lo envía a [_processSms].
   Future<void> _startSmsListener() async {
     try {
       if (!_hasSmsPermission) {
@@ -220,6 +263,11 @@ class NotificationService with ChangeNotifier {
   }
 
 
+  /// Analiza si un SMS entrante es relevante para la aplicación.
+  ///
+  /// Filtra el mensaje buscando palabras clave bancarias (ej. "compra", "Bancolombia").
+  /// Si es relevante, extrae los datos con [_parseBankingSms] e inicia el proceso
+  /// de transacción con el backend y muestra una notificación local de detección.
   void _processSms(SmsMessage sms) {
     try {
       final message = sms.body?.toLowerCase() ?? '';
@@ -256,7 +304,10 @@ class NotificationService with ChangeNotifier {
     }
   }
 
-
+  /// Extrae información estructurada (monto, comercio, tipo) del cuerpo de un SMS.
+  ///
+  /// Utiliza Expresiones Regulares (RegExp) para identificar patrones de dinero y texto.
+  /// Retorna un [Map] con los datos o `null` si no logra parsear el mensaje.
   Map<String, dynamic>? _parseBankingSms(String smsBody) {
     try {
       // Implementar lógica de parseo de SMS
@@ -300,6 +351,12 @@ class NotificationService with ChangeNotifier {
     }
   }
 
+  /// Envía los datos de una transacción detectada por SMS al servidor.
+  ///
+  /// Realiza una llamada HTTP POST a través de [ApiService.processTransactionFromNotification].
+  ///
+  /// Si el backend responde que se generó un ahorro ([transaction.savingAmount] > 0),
+  /// dispara una notificación de ahorro al usuario.
   Future<void> _processTransactionFromSms(Map<String, dynamic> transactionData) async {
     try {
       _logger.i('Procesando transacción desde SMS: $transactionData');
@@ -343,6 +400,10 @@ class NotificationService with ChangeNotifier {
   }
 
   // Callback de notificación
+
+  /// Maneja la acción del usuario al tocar una notificación.
+  ///
+  /// Enruta la navegación de la app basándose en el [response.payload].
   void _onNotificationTapped(NotificationResponse response) {
     _logger.i('Notification tapped: ${response.payload}');
 
@@ -364,6 +425,8 @@ class NotificationService with ChangeNotifier {
   }
 
   // Cancelar notificaciones
+
+  /// Cancela una notificación específica por su [id].
   Future<void> cancelNotification(int id) async {
     try {
       await _flutterLocalNotificationsPlugin.cancel(id);
@@ -373,6 +436,7 @@ class NotificationService with ChangeNotifier {
     }
   }
 
+  /// Cancela todas las notificaciones pendientes o visibles.
   Future<void> cancelAllNotifications() async {
     try {
       await _flutterLocalNotificationsPlugin.cancelAll();

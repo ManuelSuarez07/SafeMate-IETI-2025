@@ -10,9 +10,16 @@ import 'services/api_service.dart';
 import 'services/notification_service.dart';
 import 'services/auth_service.dart';
 
+/// Instancia global del plugin de notificaciones para su inicialización en el punto de entrada.
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 
+/// Punto de entrada principal de la aplicación.
+///
+/// Responsabilidades:
+/// 1. Inicializar los bindings nativos de Flutter.
+/// 2. Configurar servicios externos asíncronos: Firebase, Notificaciones Locales y [SharedPreferences].
+/// 3. Lanzar el widget raíz [SaveMateApp] inyectando las preferencias compartidas.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -24,7 +31,15 @@ void main() async {
   ));
 }
 
+/// Widget raíz de la aplicación SaveMate.
+///
+/// Este widget es responsable de:
+/// 1. Configurar la inyección de dependencias global mediante [MultiProvider].
+/// 2. Establecer la relación de dependencia entre [ApiService] y [NotificationService] usando [ChangeNotifierProxyProvider].
+/// 3. Definir el tema visual global (Colores, Tipografía Poppins).
+/// 4. Gestionar el enrutamiento inicial basado en el estado de autenticación del usuario.
 class SaveMateApp extends StatelessWidget {
+  /// Instancia de preferencias compartidas inyectada desde el [main].
   final SharedPreferences prefs;
 
   const SaveMateApp({
@@ -37,12 +52,15 @@ class SaveMateApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         // 1. Creamos el ApiService
+        // Proveedor base para comunicaciones HTTP.
         ChangeNotifierProvider(create: (_) => ApiService()),
 
         // 2. Creamos el AuthService (que depende de ApiService)
+        // Inyecta ApiService para realizar el login contra el backend propio.
         ChangeNotifierProvider(create: (context) => AuthService(prefs, Provider.of<ApiService>(context, listen: false))),
 
         // 3. [MODIFICADO] Usamos ProxyProvider para inyectar ApiService en NotificationService
+        // Permite que el servicio de notificaciones envíe transacciones detectadas al backend.
         ChangeNotifierProxyProvider<ApiService, NotificationService>(
           create: (_) => NotificationService(), // Obtiene la instancia Singleton
           update: (_, apiService, notificationService) {
@@ -93,6 +111,7 @@ class SaveMateApp extends StatelessWidget {
             ),
           ),
         ),
+        // Decide qué pantalla mostrar basado en si el usuario ya inició sesión
         home: Consumer<AuthService>(
           builder: (context, authService, child) {
             return authService.isLoggedIn ? HomeScreen() : LoginScreen();

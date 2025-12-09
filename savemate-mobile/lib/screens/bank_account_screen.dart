@@ -4,6 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 
+/// Pantalla para la gestión y vinculación de la cuenta bancaria del usuario.
+///
+/// Esta clase es responsable de:
+/// 1. Visualizar de forma segura la cuenta bancaria actual (enmascarada).
+/// 2. Proveer un formulario para seleccionar una entidad financiera de una lista predefinida.
+/// 3. Validar y enviar los datos de la nueva cuenta al backend a través de [AuthService].
+/// 4. Alternar entre modo de visualización y modo de edición según el estado actual del usuario.
 class BankAccountScreen extends StatefulWidget {
   const BankAccountScreen({Key? key}) : super(key: key);
 
@@ -15,9 +22,12 @@ class _BankAccountScreenState extends State<BankAccountScreen> {
   final _formKey = GlobalKey<FormState>();
   final _accountController = TextEditingController();
   String? _selectedBank;
+
+  /// Controla si el formulario está habilitado para escritura.
+  /// Se inicializa en `false` si el usuario ya tiene datos guardados.
   bool _isEditing = true;
 
-  // Lista de bancos colombianos comunes
+  /// Lista estática de bancos soportados para la selección en el dropdown.
   final List<String> _banks = [
     'Bancolombia',
     'Nequi',
@@ -30,6 +40,13 @@ class _BankAccountScreenState extends State<BankAccountScreen> {
     'Banco Popular'
   ];
 
+  /// Inicializa el estado del widget y carga los datos existentes.
+  ///
+  /// Obtiene el usuario actual desde [AuthService]. Si el [User] ya posee
+  /// una [bankAccount] vinculada:
+  /// - Pre-llena el [_accountController].
+  /// - Establece el [_selectedBank] (validando que exista en la lista [_banks]).
+  /// - Deshabilita el modo de edición ([_isEditing] = false).
   @override
   void initState() {
     super.initState();
@@ -58,6 +75,17 @@ class _BankAccountScreenState extends State<BankAccountScreen> {
     super.dispose();
   }
 
+  /// Valida el formulario y solicita la vinculación de la cuenta al servicio.
+  ///
+  /// Ejecuta las siguientes acciones:
+  /// 1. Valida los campos del formulario usando [_formKey].
+  /// 2. Invoca [AuthService.linkBankAccount] enviando el número de cuenta y el banco seleccionado.
+  ///    (Esto realiza una petición HTTP al backend para actualizar el perfil del usuario).
+  /// 3. Gestiona la respuesta:
+  ///    - Si es exitosa: Muestra un feedback visual y cierra la pantalla.
+  ///    - Si falla: Muestra un [SnackBar] con el error proveniente del servicio.
+  ///
+  /// Retorna un [Future<void>].
   Future<void> _saveAccount() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -295,6 +323,11 @@ class _BankAccountScreenState extends State<BankAccountScreen> {
     );
   }
 
+  /// Formatea el número de cuenta para mostrarlo en la tarjeta visual.
+  ///
+  /// Recibe el [number] completo y retorna una cadena enmascarada
+  /// mostrando solo los últimos 4 dígitos (ej. "**** **** **** 1234")
+  /// para proteger la privacidad del usuario en la interfaz.
   String _formatAccountNumber(String number) {
     if (number.length <= 4) return number;
     // Muestra solo los últimos 4 dígitos

@@ -3,11 +3,29 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../models/ai_recommendation.dart';
 
+/// Widget que representa una tarjeta visual para mostrar una recomendación generada por la Inteligencia Artificial.
+///
+/// Esta clase es responsable de:
+/// 1. Visualizar los datos de un objeto [AIRecommendation] (título, descripción, ahorro potencial, confianza).
+/// 2. Adaptar su diseño entre una vista completa (Card) y una vista compacta (ListTile personalizado) mediante [isCompact].
+/// 3. Ofrecer botones de acción para aplicar ([onApply]) o descartar ([onDismiss]) la recomendación.
+/// 4. Indicar visualmente si una recomendación ya ha sido aplicada.
 class AITipCard extends StatelessWidget {
+  /// El modelo de datos que contiene la información de la recomendación.
   final AIRecommendation recommendation;
+
+  /// Callback que se ejecuta al tocar el cuerpo de la tarjeta (para ver detalles).
   final VoidCallback? onTap;
+
+  /// Callback que se ejecuta al presionar el botón de "Aplicar".
+  /// Usualmente desencadena una llamada a la API para ejecutar la acción sugerida.
   final VoidCallback? onApply;
+
+  /// Callback que se ejecuta al presionar el botón de "Ahora no".
   final VoidCallback? onDismiss;
+
+  /// Determina si la tarjeta se renderiza en modo resumen (compacto) o con todos los detalles.
+  /// Por defecto es `false`.
   final bool isCompact;
 
   const AITipCard({
@@ -19,12 +37,17 @@ class AITipCard extends StatelessWidget {
     this.isCompact = false,
   }) : super(key: key);
 
+  /// Construye la interfaz gráfica de la tarjeta.
+  ///
+  /// Si [isCompact] es `true`, delega la construcción a [_buildCompactCard].
+  /// De lo contrario, construye una [Card] completa con gradientes, iconos de categoría,
+  /// métricas de confianza y botones de acción.
   @override
   Widget build(BuildContext context) {
     if (isCompact) {
       return _buildCompactCard();
     }
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 3,
@@ -129,9 +152,9 @@ class AITipCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Descripción
                 Text(
                   recommendation.description,
@@ -143,7 +166,7 @@ class AITipCard extends StatelessWidget {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
-                
+
                 // Ahorro potencial
                 if (recommendation.hasPotentialSavings) ...[
                   const SizedBox(height: 12),
@@ -190,7 +213,7 @@ class AITipCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                
+
                 // Footer
                 const SizedBox(height: 16),
                 Row(
@@ -213,7 +236,7 @@ class AITipCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                
+
                 // Acciones
                 if (!recommendation.isApplied) ...[
                   const SizedBox(height: 16),
@@ -289,6 +312,10 @@ class AITipCard extends StatelessWidget {
     );
   }
 
+  /// Construye la versión compacta de la tarjeta.
+  ///
+  /// Muestra únicamente el icono, título y, si existe, el ahorro potencial.
+  /// Es ideal para listados donde el espacio vertical es limitado.
   Widget _buildCompactCard() {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -368,6 +395,7 @@ class AITipCard extends StatelessWidget {
     );
   }
 
+  /// Retorna el [IconData] visual correspondiente al [RecommendationType] dado.
   IconData _getRecommendationIcon(RecommendationType type) {
     switch (type) {
       case RecommendationType.spendingPattern:
@@ -388,7 +416,10 @@ class AITipCard extends StatelessWidget {
   }
 }
 
-// Widget para tips rápidos de IA
+/// Widget reutilizable para mostrar consejos o tips rápidos de la IA con un diseño visual atractivo.
+///
+/// A diferencia de [AITipCard], este widget es puramente presentacional y no depende
+/// del modelo [AIRecommendation], recibiendo sus datos directamente como parámetros.
 class QuickAITip extends StatelessWidget {
   final String title;
   final String description;

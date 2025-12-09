@@ -7,6 +7,17 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user.dart';
 import 'api_service.dart';
 
+/// Servicio central encargado de la gestión del estado de autenticación y la sincronización de usuarios.
+///
+/// Esta clase implementa un patrón de **autenticación híbrida**:
+/// 1. Utiliza **Firebase Auth** para garantizar la seguridad de las credenciales y el manejo de tokens (JWT).
+/// 2. Sincroniza la identidad con un **Backend MySQL personalizado** (vía [ApiService]) para obtener datos de negocio (ID relacional, configuraciones de ahorro, etc.).
+///
+/// Responsabilidades principales:
+/// - Gestión de sesión (Login, Logout, Registro, Persistencia).
+/// - Sincronización de datos entre Firebase y el Backend propio.
+/// - Manejo de inicio de sesión social (Google).
+/// - Actualización de perfil y configuraciones de usuario.
 class AuthService with ChangeNotifier {
   final ApiService _apiService;
   final SharedPreferences _prefs;
@@ -17,6 +28,7 @@ class AuthService with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  /// Inicializa el servicio y recupera la sesión del almacenamiento local si existe.
   AuthService(this._prefs, this._apiService) {
     Future.microtask(() => _loadUserFromPrefs());
   }
@@ -25,10 +37,21 @@ class AuthService with ChangeNotifier {
   User? get user => _user;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  /// Indica si hay una sesión activa válida tanto localmente como en los servicios de autenticación.
   bool get isLoggedIn => _user != null && (_apiService.isAuthenticated || _firebaseAuth.currentUser != null);
 
   // --- LOGIN CON FIREBASE ---
-// --- LOGIN ---
+
+  /// Realiza el proceso de inicio de sesión híbrido (Firebase + Backend MySQL).
+  ///
+  /// Flujo de ejecución:
+  /// 1. Autentica contra Firebase con [email] y [password] para obtener un token seguro.
+  /// 2. Envía las credenciales al backend propio mediante [_apiService.login] para obtener el objeto [User] con el ID de la base de datos MySQL.
+  /// 3. Sincroniza el token de Firebase en el [ApiService] para futuras peticiones.
+  /// 4. Persiste la sesión en [SharedPreferences].
+  ///
+  /// Retorna `true` si todo el flujo es exitoso.
   Future<bool> login(String email, String password) async {
     _setLoading(true);
     _clearError();
@@ -99,7 +122,17 @@ class AuthService with ChangeNotifier {
     }
   }
 
-// --- LOGIN CON GOOGLE ---
+  // --- LOGIN CON GOOGLE ---
+
+  /// Gestiona el inicio de sesión federado con Google.
+  ///
+  /// Flujo de ejecución:
+  /// 1. Obtiene las credenciales de Google mediante [GoogleSignIn].
+  /// 2. Intercambia credenciales con Firebase Auth.
+  /// 3. Intenta iniciar sesión en el backend propio usando una contraseña de sincronización generada.
+  /// 4. Si el usuario no existe en MySQL, lo registra automáticamente usando [_apiService.createUser].
+  ///
+  /// Retorna `true` si la autenticación y sincronización son exitosas.
   Future<bool> loginWithGoogle() async {
     _setLoading(true);
     _clearError();
@@ -180,6 +213,15 @@ class AuthService with ChangeNotifier {
   }
 
   // --- REGISTRO CON FIREBASE ---
+
+  /// Registra un nuevo usuario tanto en Firebase como en el backend propio.
+  ///
+  /// Flujo:
+  /// 1. Crea el usuario en Firebase Auth.
+  /// 2. Obtiene el token JWT.
+  /// 3. Envía los datos del [user] al backend MySQL mediante [_apiService.createUser] para asegurar la consistencia de datos.
+  ///
+  /// Retorna `true` si el registro y la sincronización son exitosos.
   Future<bool> register(User user, String password) async {
     _setLoading(true);
     _clearError();
@@ -232,6 +274,12 @@ class AuthService with ChangeNotifier {
   }
 
   // --- LOGOUT ---
+
+  /// Cierra la sesión del usuario en todas las capas.
+  ///
+  /// 1. Limpia [SharedPreferences].
+  /// 2. Invalida el estado en [_apiService].
+  /// 3. Cierra sesión en Firebase Auth.
   Future<void> logout() async {
     _setLoading(true);
 
@@ -259,6 +307,11 @@ class AuthService with ChangeNotifier {
   }
 
   // --- TOKEN REFRESH ---
+
+  /// Fuerza la actualización del token de Firebase Auth.
+  ///
+  /// Utiliza `getIdToken(true)` para obtener un nuevo token JWT y actualiza el [_apiService].
+  /// Esto es útil para mantener la sesión viva o actualizar claims.
   Future<bool> refreshToken() async {
     try {
       final currentUser = _firebaseAuth.currentUser;
@@ -289,6 +342,10 @@ class AuthService with ChangeNotifier {
   }
 
   // --- ACTUALIZAR PERFIL ---
+
+  /// Actualiza los datos básicos del perfil del usuario.
+  ///
+  /// Llama a [_apiService.updateUser] y actualiza el estado local y la persistencia.
   Future<bool> updateProfile(User updatedUser) async {
     _setLoading(true);
     _clearError();
@@ -311,6 +368,11 @@ class AuthService with ChangeNotifier {
   }
 
   // --- CONFIGURACIÓN DE AHORRO ---
+
+  /// Actualiza las preferencias de ahorro del usuario.
+  ///
+  /// Mapea los enums [SavingType] e [InsufficientBalanceOption] a cadenas compatibles
+  /// con el backend y llama a [_apiService.updateSavingConfiguration].
   Future<bool> updateSavingConfiguration({
     required SavingType savingType,
     required int roundingMultiple,
@@ -358,6 +420,10 @@ class AuthService with ChangeNotifier {
   }
 
   // --- VINCULAR CUENTA BANCARIA ---
+
+  /// Vincula una cuenta bancaria al perfil del usuario.
+  ///
+  /// Actualiza los campos `bankAccount` y `bankName` a través del endpoint de configuración.
   Future<bool> linkBankAccount(String bankAccount, String bankName) async {
     _setLoading(true);
     _clearError();
@@ -381,10 +447,13 @@ class AuthService with ChangeNotifier {
     }
   }
 
+  /// Verifica si el usuario actual tiene una cuenta bancaria vinculada.
   bool hasBankAccount() {
     return _user?.bankAccount != null && _user!.bankAccount!.isNotEmpty;
   }
 
+  /// Actualiza el estado del usuario localmente sin realizar peticiones a la API.
+  /// Útil cuando otros servicios devuelven un usuario actualizado.
   void updateProfileLocal(User updatedUser) {
     _user = updatedUser;
     notifyListeners();
@@ -408,6 +477,7 @@ class AuthService with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Guarda el objeto [User] serializado en [SharedPreferences].
   Future<void> _saveUserToPrefs() async {
     if (_user != null) {
       try {
@@ -419,7 +489,10 @@ class AuthService with ChangeNotifier {
     }
   }
 
-  // Cargar usuario persistido y verificar si la sesión de Firebase sigue activa
+  /// Carga la sesión persistida al iniciar la aplicación.
+  ///
+  /// Verifica que existan el token, los datos del usuario local y una sesión activa en Firebase.
+  /// Si alguna condición falla, fuerza el logout.
   void _loadUserFromPrefs() {
     try {
       final token = _prefs.getString('access_token');

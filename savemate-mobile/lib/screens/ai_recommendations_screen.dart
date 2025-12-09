@@ -6,6 +6,13 @@ import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../models/ai_recommendation.dart';
 
+/// Pantalla principal para visualizar y gestionar las recomendaciones generadas por IA.
+///
+/// Esta clase es responsable de:
+/// 1. Mostrar un resumen de oportunidades de ahorro y sugerencias financieras.
+/// 2. Permitir al usuario solicitar un nuevo análisis mediante Gemini AI.
+/// 3. Listar las recomendaciones activas obtenidas del backend.
+/// 4. Permitir aplicar o ver detalles de recomendaciones específicas.
 class AIRecommendationsScreen extends StatefulWidget {
   const AIRecommendationsScreen({Key? key}) : super(key: key);
 
@@ -14,18 +21,31 @@ class AIRecommendationsScreen extends StatefulWidget {
 }
 
 class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
+  /// Lista local de recomendaciones obtenidas del servicio.
   List<AIRecommendation> _recommendations = [];
+
+  /// Indica si se están cargando las recomendaciones iniciales o refrescando la lista.
   bool _isLoading = true;
+
+  /// Indica si se está ejecutando el proceso de generación de nuevas recomendaciones con IA.
   bool _isGenerating = false;
 
   @override
   void initState() {
     super.initState();
+    // Carga las recomendaciones una vez que el árbol de widgets está construido.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadRecommendations();
     });
   }
 
+  /// Carga las recomendaciones activas del usuario desde el backend.
+  ///
+  /// Utiliza [ApiService.getActiveRecommendations] realizando una petición HTTP GET.
+  /// Requiere que el usuario esté autenticado a través de [AuthService].
+  ///
+  /// Actualiza [_recommendations] y gestiona el estado de [_isLoading].
+  /// Retorna un [Future<void>].
   Future<void> _loadRecommendations() async {
     if (!mounted) return;
     setState(() {
@@ -55,6 +75,16 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     }
   }
 
+  /// Solicita la generación de nuevas recomendaciones basadas en patrones de gasto.
+  ///
+  /// Realiza una llamada HTTP al endpoint que integra Gemini AI mediante
+  /// [ApiService.generateSpendingPatternRecommendations].
+  ///
+  /// Al finalizar exitosamente:
+  /// 1. Recarga la lista de recomendaciones llamando a [_loadRecommendations].
+  /// 2. Muestra un [SnackBar] de éxito.
+  ///
+  /// Retorna un [Future<void>].
   Future<void> _generateRecommendations() async {
     if (!mounted) return;
     setState(() {
@@ -159,6 +189,12 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     );
   }
 
+  /// Construye la interfaz visual para el estado vacío (sin recomendaciones).
+  ///
+  /// Muestra un icono, un mensaje descriptivo y un botón para invocar
+  /// manualmente [_generateRecommendations].
+  ///
+  /// Retorna un [Widget] centrado.
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
@@ -224,6 +260,14 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     );
   }
 
+  /// Construye el encabezado de la pantalla con un resumen estadístico.
+  ///
+  /// Calcula y muestra:
+  /// - El número total de oportunidades.
+  /// - La cantidad de recomendaciones con "alta confianza".
+  /// - El ahorro potencial total sumando los valores de las recomendaciones.
+  ///
+  /// Retorna un [Widget] contenedor con gradiente.
   Widget _buildHeader() {
     final totalPotentialSavings = _recommendations
         .where((r) => r.hasPotentialSavings)
@@ -324,6 +368,7 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     );
   }
 
+  /// Helper para construir una estadística individual dentro del header.
   Widget _buildHeaderStat(String label, String value, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,6 +393,15 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     );
   }
 
+  /// Construye una tarjeta visual para una recomendación individual.
+  ///
+  /// Recibe un objeto [AIRecommendation] y muestra:
+  /// - Título, categoría e icono.
+  /// - Descripción corta (truncada a 3 líneas).
+  /// - Ahorro potencial si existe.
+  /// - Botón para aplicar o indicador de "Aplicada".
+  ///
+  /// Abre el detalle completo al hacer tap mediante [_showRecommendationDetails].
   Widget _buildRecommendationCard(AIRecommendation recommendation) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -503,6 +557,7 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     );
   }
 
+  /// Retorna el [IconData] apropiado según el tipo de recomendación [RecommendationType].
   IconData _getRecommendationIcon(RecommendationType type) {
     switch (type) {
       case RecommendationType.spendingPattern:
@@ -524,6 +579,13 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     }
   }
 
+  /// Aplica una recomendación específica llamando al API.
+  ///
+  /// Recibe un objeto [AIRecommendation].
+  /// Realiza una petición HTTP mediante [ApiService.applyRecommendation].
+  ///
+  /// Muestra feedback visual (SnackBars) durante el proceso y recarga
+  /// la lista completa al finalizar exitosamente.
   Future<void> _applyRecommendation(AIRecommendation recommendation) async {
     if (!mounted) return;
 
@@ -561,6 +623,10 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     }
   }
 
+  /// Muestra un modal (BottomSheet) con los detalles completos de la recomendación.
+  ///
+  /// Permite leer la descripción extendida, ver la prioridad, el ahorro estimado
+  /// y ofrece la acción de aplicar la recomendación si aún no ha sido aplicada.
   void _showRecommendationDetails(AIRecommendation recommendation) {
     showModalBottomSheet(
       context: context,
@@ -722,6 +788,7 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
     );
   }
 
+  /// Widget auxiliar para mostrar un item de detalle en el modal (icono + etiqueta + valor).
   Widget _buildDetailItem(String label, String value, IconData icon, {Color? valueColor}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),

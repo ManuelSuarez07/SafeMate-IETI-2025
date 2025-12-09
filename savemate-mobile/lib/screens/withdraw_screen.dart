@@ -7,6 +7,13 @@ import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import 'bank_account_screen.dart';
 
+/// Pantalla para gestionar el retiro de fondos ahorrados hacia la cuenta bancaria vinculada.
+///
+/// Esta clase es responsable de:
+/// 1. Verificar prerrequisitos: Asegura que el usuario tenga una cuenta bancaria configurada antes de permitir el retiro.
+/// 2. Validar fondos: Comprueba que el monto solicitado no exceda el saldo ahorrado ([User.totalSaved]).
+/// 3. Simular proceso bancario: Ejecuta una secuencia visual de pasos para mejorar la experiencia de usuario.
+/// 4. Ejecutar la transacción: Comunica la solicitud de retiro al backend.
 class WithdrawScreen extends StatefulWidget {
   const WithdrawScreen({Key? key}) : super(key: key);
 
@@ -27,6 +34,11 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     'Confirmación exitosa.'
   ];
 
+  /// Inicializa el estado y verifica si el usuario tiene una cuenta bancaria válida.
+  ///
+  /// Utiliza [WidgetsBinding.instance.addPostFrameCallback] para acceder al [AuthService]
+  /// después de la construcción del widget. Si [User.bankAccount] es nulo o vacío,
+  /// invoca [_showNoAccountDialog] para bloquear el acceso y redirigir al usuario.
   @override
   void initState() {
     super.initState();
@@ -38,6 +50,9 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     });
   }
 
+  /// Muestra un diálogo modal obligatorio si falta la cuenta bancaria.
+  ///
+  /// Permite navegar directamente a [BankAccountScreen] para realizar la vinculación.
   void _showNoAccountDialog() {
     showDialog(
       context: context,
@@ -68,6 +83,16 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
+  /// Gestiona el flujo completo de la solicitud de retiro.
+  ///
+  /// Pasos que ejecuta:
+  /// 1. Valida que el input sea numérico y positivo.
+  /// 2. Valida localmente que [User.totalSaved] sea suficiente para cubrir el retiro.
+  /// 3. Inicia una simulación visual iterando sobre [_simulationSteps].
+  /// 4. Realiza la llamada HTTP real mediante [ApiService.withdrawFunds].
+  /// 5. Muestra el resultado (éxito o error) al usuario.
+  ///
+  /// Retorna un [Future<void>].
   Future<void> _processWithdrawal() async {
     if (_amountController.text.isEmpty) return;
 
@@ -129,6 +154,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     }
   }
 
+  /// Muestra un diálogo de confirmación tras un retiro exitoso.
   void _showSuccessDialog(double amount, String bankName) {
     showDialog(
       context: context,
@@ -197,6 +223,13 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
+  /// Construye la vista del formulario de retiro.
+  ///
+  /// Muestra:
+  /// - Saldo disponible actual.
+  /// - Información de la cuenta destino.
+  /// - Campo de entrada para el monto.
+  /// - Botón rápido para "Retirar todo".
   Widget _buildInputView(String bankName, String accountNumber, double totalSaved) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -306,6 +339,10 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
+  /// Construye la vista de simulación de proceso bancario.
+  ///
+  /// Muestra un indicador de carga y mensajes de estado que cambian dinámicamente
+  /// según el progreso de la simulación definida en [_simulationSteps].
   Widget _buildSimulationView(String bankName) {
     return Container(
       width: double.infinity,

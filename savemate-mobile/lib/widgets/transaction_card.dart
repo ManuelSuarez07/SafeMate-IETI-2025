@@ -3,9 +3,22 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../models/transaction.dart';
 
+/// Widget que representa una tarjeta visual detallada para una transacción financiera.
+///
+/// Esta clase es responsable de:
+/// 1. Mostrar información principal: Icono por tipo, Descripción, Comercio, Fecha y Monto.
+/// 2. Visualizar el estado de la transacción mediante etiquetas de color (e.g. Completada, Pendiente).
+/// 3. Indicar visualmente si hubo un ahorro automático asociado (Redondeo) mostrando el monto ahorrado en verde.
+/// 4. Desplegar detalles técnicos adicionales (fuente, referencia bancaria, desglose de redondeo) si [showDetails] es verdadero.
 class TransactionCard extends StatelessWidget {
+  /// El objeto de datos que contiene la información de la transacción.
   final Transaction transaction;
+
+  /// Callback opcional que se ejecuta al tocar la tarjeta.
   final VoidCallback? onTap;
+
+  /// Controla si se debe renderizar la sección expandida con detalles técnicos.
+  /// Por defecto es `false`.
   final bool showDetails;
 
   const TransactionCard({
@@ -130,6 +143,12 @@ class TransactionCard extends StatelessWidget {
     );
   }
 
+  /// Construye la sección de detalles técnicos adicionales.
+  ///
+  /// Muestra información como:
+  /// - Cálculo del redondeo automático (Monto original -> Monto redondeado).
+  /// - Fuente de la notificación (e.g., SMS, Manual).
+  /// - Referencia bancaria si está disponible.
   Widget _buildAdditionalDetails(BuildContext context, Transaction transaction) {
     return Column(
       children: [
@@ -148,6 +167,7 @@ class TransactionCard extends StatelessWidget {
     );
   }
 
+  /// Helper para construir una fila de detalle con icono y texto.
   Widget _buildDetailRow(BuildContext context, String label, String value, IconData icon, Color color) {
     return Row(children: [
       Icon(icon, size: 16, color: color),
@@ -157,11 +177,19 @@ class TransactionCard extends StatelessWidget {
     ]);
   }
 
+  /// Verifica si la transacción tiene datos extra para mostrar en la vista detallada.
   bool _hasAdditionalDetails(Transaction transaction) {
     return transaction.originalAmount != null || transaction.notificationSource != null || transaction.bankReference != null;
   }
 
-  // ✅ [CORRECCIÓN] Se agregó el caso .withdrawal
+  /// Retorna el icono visual apropiado según el tipo de transacción [TransactionType].
+  ///
+  /// Soporta:
+  /// - [TransactionType.expense]: Carrito de compras.
+  /// - [TransactionType.income]: Billete adjunto.
+  /// - [TransactionType.saving]: Alcancía.
+  /// - [TransactionType.fee]: Recibo.
+  /// - [TransactionType.withdrawal]: Flecha circular hacia arriba (Retiro).
   IconData _getTransactionIcon(TransactionType type) {
     switch (type) {
       case TransactionType.expense: return Icons.shopping_cart;
@@ -173,6 +201,10 @@ class TransactionCard extends StatelessWidget {
   }
 }
 
+/// Versión compacta y resumida de la tarjeta de transacción.
+///
+/// Ideal para listados densos o widgets de resumen (Dashboard) donde el espacio es limitado.
+/// Muestra solo la información esencial: Icono, Descripción, Fecha corta y Monto.
 class CompactTransactionCard extends StatelessWidget {
   final Transaction transaction;
   final VoidCallback? onTap;
@@ -223,7 +255,7 @@ class CompactTransactionCard extends StatelessWidget {
     );
   }
 
-  // ✅ [CORRECCIÓN] Se agregó el caso .withdrawal
+  /// Retorna el icono visual apropiado según el tipo de transacción [TransactionType].
   IconData _getTransactionIcon(TransactionType type) {
     switch (type) {
       case TransactionType.expense: return Icons.shopping_cart;

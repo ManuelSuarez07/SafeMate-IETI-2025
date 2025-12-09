@@ -7,6 +7,13 @@ import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../models/transaction.dart';
 
+/// Pantalla principal para visualizar el historial de transacciones financieras.
+///
+/// Esta clase es responsable de:
+/// 1. Listar transacciones clasificadas por pestañas (Todas, Gastos, Ingresos, Ahorros).
+/// 2. Mostrar un resumen financiero (Dashboard) con totales calculados dinámicamente.
+/// 3. Proveer herramientas de filtrado y actualización manual (Pull-to-refresh).
+/// 4. Permitir la creación de nuevas transacciones mediante [AddTransactionDialog].
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({Key? key}) : super(key: key);
 
@@ -42,6 +49,16 @@ class TransactionsScreenState extends State<TransactionsScreen>
     super.dispose();
   }
 
+  /// Obtiene y clasifica las transacciones del usuario desde el backend.
+  ///
+  /// Realiza una llamada HTTP mediante [ApiService.getTransactionsByUserId].
+  ///
+  /// Acciones principales:
+  /// - Ordena las transacciones por fecha descendente (de la más reciente a la más antigua).
+  /// - Segrega la lista principal en sub-listas ([_expenses], [_income], [_savings]) para
+  ///   alimentar las diferentes pestañas de la interfaz.
+  ///
+  /// Retorna un [Future<void>].
   Future<void> _loadTransactions() async {
     if (!mounted) return;
     setState(() {
@@ -89,6 +106,7 @@ class TransactionsScreenState extends State<TransactionsScreen>
     }
   }
 
+  /// Retorna la lista de transacciones correspondiente al filtro seleccionado en el diálogo.
   List<Transaction> get _filteredTransactions {
     switch (_selectedFilter) {
       case 'Gastos':
@@ -151,6 +169,10 @@ class TransactionsScreenState extends State<TransactionsScreen>
     );
   }
 
+  /// Construye la lista visual de transacciones o el estado vacío.
+  ///
+  /// Recibe una lista de [Transaction] y renderiza un [ListView] con tarjetas
+  /// de detalle y un encabezado de resumen.
   Widget _buildTransactionsList(List<Transaction> transactions) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -210,6 +232,13 @@ class TransactionsScreenState extends State<TransactionsScreen>
     );
   }
 
+  /// Construye la tarjeta de resumen financiero (Dashboard).
+  ///
+  /// Calcula y muestra los totales de:
+  /// - Gastos totales.
+  /// - Ingresos totales.
+  /// - Ahorros directos.
+  /// - Ahorros generados por redondeo automático.
   Widget _buildSummaryCard(List<Transaction> transactions) {
     final totalExpenses = _expenses.fold<double>(0, (sum, t) => sum + t.amount);
     final totalIncome = _income.fold<double>(0, (sum, t) => sum + t.amount);
@@ -552,6 +581,10 @@ class TransactionsScreenState extends State<TransactionsScreen>
     );
   }
 
+  /// Muestra el diálogo para añadir una nueva transacción.
+  ///
+  /// Abre [AddTransactionDialog] y, si la operación es exitosa (retorna `true`),
+  /// recarga la lista de transacciones.
   void showAddTransactionDialog() {
     showDialog(
       context: context,
@@ -565,6 +598,7 @@ class TransactionsScreenState extends State<TransactionsScreen>
 }
 
 // --- DIÁLOGO DE AÑADIR TRANSACCIÓN ---
+/// Diálogo modal que permite al usuario crear una nueva transacción.
 class AddTransactionDialog extends StatefulWidget {
   const AddTransactionDialog({Key? key}) : super(key: key);
 
@@ -614,6 +648,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     }
   }
 
+  /// Valida el formulario y envía la nueva transacción al servidor.
+  ///
+  /// Crea un objeto [Transaction] con los datos ingresados y realiza un POST
+  /// mediante [ApiService.createTransaction].
+  ///
+  /// Muestra notificación de éxito y cierra el diálogo retornando `true`.
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       setState(() {

@@ -7,6 +7,13 @@ import '../models/user.dart'; // Asegúrate de que este import se use si es nece
 import 'home_screen.dart';
 import 'register_screen.dart';
 
+/// Pantalla de inicio de sesión que gestiona la autenticación del usuario.
+///
+/// Esta clase es responsable de:
+/// 1. Proporcionar un formulario validado para el ingreso por correo y contraseña.
+/// 2. Integrar el botón de inicio de sesión social con Google.
+/// 3. Gestionar los estados de carga visual ([_isLoading]) y feedback de errores.
+/// 4. Orquestar la navegación hacia [HomeScreen] tras un éxito o [RegisterScreen] para nuevos usuarios.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -29,6 +36,16 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  /// Ejecuta el proceso de autenticación tradicional con credenciales (correo/contraseña).
+  ///
+  /// Flujo de ejecución:
+  /// 1. Valida los campos del formulario usando [_formKey].
+  /// 2. Activa el indicador de carga.
+  /// 3. Invoca a [AuthService.login], lo cual realiza una petición HTTP al endpoint de autenticación.
+  /// 4. Si la respuesta es exitosa, navega a [HomeScreen].
+  /// 5. Si falla, muestra un [SnackBar] con el error retornado por la API.
+  ///
+  /// Retorna un [Future<void>].
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -66,7 +83,15 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Lógica de inicio de sesión de Google
+  /// Inicia el flujo de autenticación federada con Google.
+  ///
+  /// Delega la lógica a [AuthService.loginWithGoogle], que gestiona el flujo OAuth
+  /// y la comunicación con el backend para validar el token.
+  ///
+  /// Gestiona la interfaz de carga y la navegación a [HomeScreen] en caso de éxito,
+  /// o muestra errores en caso de fallo.
+  ///
+  /// Retorna un [Future<void>].
   Future<void> _loginGoogle() async {
     setState(() => _isLoading = true);
 
