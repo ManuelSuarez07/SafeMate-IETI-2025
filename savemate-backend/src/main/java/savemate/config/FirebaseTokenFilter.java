@@ -15,13 +15,42 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections; // Usaremos Collections.emptyList()
 
+/**
+ * Filtro de seguridad que valida tokens de Firebase y establece la autenticación en Spring Security.
+ *
+ * <p>Responsabilidad: Componente de infraestructura de seguridad (\@Component) que intercepta
+ * cada petición HTTP (extiende {@link OncePerRequestFilter}), extrae el encabezado
+ * {@code Authorization} con esquema Bearer, verifica el token mediante {@link FirebaseAuth}
+ * y, si es válido, construye un objeto de autenticación {@link UsernamePasswordAuthenticationToken}
+ * usando el email del usuario como principal. Si ya existe una autenticación en el contexto,
+ * el filtro delega sin realizar nuevas comprobaciones. Los errores de validación de Firebase
+ * se registran y la petición continúa sin autenticación.
+ */
 @Component
 @Slf4j
 public class FirebaseTokenFilter extends OncePerRequestFilter {
 
+    /**
+     * Intercepta la petición HTTP y valida el token de Firebase si está presente.
+     *
+     * <p>Flujo principal:
+     * <ol>
+     *   <li>Si ya existe una autenticación en el {@link SecurityContextHolder}, delega al siguiente filtro.</li>
+     *   <li>Lee el encabezado {@code Authorization} y, si contiene un token Bearer, intenta verificarlo con {@link FirebaseAuth#verifyIdToken}.</li>
+     *   <li>Si la verificación es correcta, extrae el email del {@link FirebaseToken}, crea un {@link UsernamePasswordAuthenticationToken}
+     *       con autoridades vacías y lo establece en el contexto de seguridad.</li>
+     *   <li>Si ocurre una excepción de Firebase, se registra una advertencia y la cadena de filtros continua sin establecer autenticación.</li>
+     * </ol>
+     *
+     * @param request petición HTTP entrante que puede contener el encabezado Authorization
+     * @param response respuesta HTTP asociada a la petición
+     * @param filterChain cadena de filtros a la que delegar la petición después del procesamiento
+     * @return void (no devuelve valor); el método tiene efectos secundarios sobre el {@link SecurityContextHolder} y la cadena de filtros
+     * @throws ServletException si ocurre un error de tipo servlet durante el filtrado
+     * @throws IOException si ocurre un error de E/S al procesar la petición/respuesta
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {

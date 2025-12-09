@@ -1,6 +1,6 @@
 package savemate.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty; // <--- IMPORTANTE PARA SEGURIDAD
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -11,6 +11,19 @@ import savemate.model.User;
 
 import java.time.LocalDateTime;
 
+/**
+ * Objeto de Transferencia de Datos (DTO) que centraliza la gestión del perfil de usuario, credenciales y
+ * configuraciones paramétricas del sistema de ahorro.
+ * <p>
+ * Esta clase actúa como la interfaz principal de datos entre el cliente (Frontend/Móvil) y el núcleo de negocio.
+ * Sus responsabilidades clave incluyen:
+ * <ul>
+ * <li>Validación de datos de entrada para registro y actualización de perfil (JSR-380).</li>
+ * <li>Protección de credenciales mediante control de serialización (campo password de solo escritura).</li>
+ * <li>Transporte de configuraciones financieras (reglas de redondeo, cuentas bancarias).</li>
+ * </ul>
+ * </p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,7 +48,7 @@ public class UserDTO {
 
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // <--- AGREGADO: Permite recibirla pero NO la devuelve al frontend
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     private String phoneNumber;
@@ -54,6 +67,18 @@ public class UserDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /**
+     * Inicializa un DTO parcial con la información básica de contacto e identidad del usuario.
+     * <p>
+     * Este constructor es útil para operaciones ligeras de consulta de perfil o formularios de
+     * actualización donde no se requiere la carga completa de datos financieros o sensibles.
+     * </p>
+     *
+     * @param email       Correo electrónico asociado a la cuenta.
+     * @param firstName   Primer nombre del usuario.
+     * @param lastName    Apellidos del usuario.
+     * @param phoneNumber Número de teléfono de contacto.
+     */
     public UserDTO(String email, String firstName, String lastName, String phoneNumber) {
         this.email = email;
         this.firstName = firstName;
@@ -61,6 +86,20 @@ public class UserDTO {
         this.phoneNumber = phoneNumber;
     }
 
+    /**
+     * Inicializa un DTO especializado para la actualización de la configuración del motor de ahorro.
+     * <p>
+     * Permite aislar la lógica de configuración financiera (estrategias de redondeo, porcentajes,
+     * límites de seguridad) del resto de datos personales, facilitando endpoints dedicados a "Settings".
+     * </p>
+     *
+     * @param id                        Identificador único del usuario a configurar.
+     * @param savingType                Modalidad de ahorro seleccionada (ej. REDONDEO, PORCENTAJE).
+     * @param roundingMultiple          Base numérica para el cálculo del redondeo (ej. a la centena o mil más cercana).
+     * @param savingPercentage          Porcentaje a aplicar si el tipo de ahorro es porcentual.
+     * @param minSafeBalance            Límite inferior de saldo en cuenta que bloquea el ahorro automático para evitar sobregiros.
+     * @param insufficientBalanceOption Estrategia a seguir cuando el saldo es insuficiente (ej. NO_SAVING, PARTIAL).
+     */
     public UserDTO(Long id, User.SavingType savingType, Integer roundingMultiple,
                    Double savingPercentage, Double minSafeBalance,
                    User.InsufficientBalanceOption insufficientBalanceOption) {
@@ -72,6 +111,13 @@ public class UserDTO {
         this.insufficientBalanceOption = insufficientBalanceOption;
     }
 
+    /**
+     * Inicializa un DTO enfocado exclusivamente en la vinculación de instrumentos bancarios.
+     *
+     * @param id          Identificador único del usuario.
+     * @param bankAccount Número de cuenta bancaria o CLABE interbancaria.
+     * @param bankName    Nombre de la institución financiera.
+     */
     public UserDTO(Long id, String bankAccount, String bankName) {
         this.id = id;
         this.bankAccount = bankAccount;

@@ -16,6 +16,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio de dominio encargado de la gestión integral del ciclo de vida transaccional y la ejecución
+ * de estrategias de micro-ahorro.
+ * <p>
+ * Este componente actúa como el núcleo operativo financiero del sistema. Sus responsabilidades críticas incluyen:
+ * <ul>
+ * <li>Ingesta y normalización de transacciones desde diversas fuentes (manual, notificaciones, hooks).</li>
+ * <li>Ejecución de algoritmos de ahorro automático (Redondeo vs. Porcentaje) en tiempo real.</li>
+ * <li>Validación de solvencia y gestión de retiros de fondos acumulados.</li>
+ * <li>Generación de métricas de flujo de caja para reportes y análisis.</li>
+ * </ul>
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,6 +39,21 @@ public class TransactionService {
     private final UserService userService;
     private final RoundingUtils roundingUtils;
 
+    /**
+     * Orquesta la creación y persistencia de una transacción genérica en el sistema.
+     * <p>
+     * Este método evalúa el tipo de transacción para desencadenar efectos secundarios:
+     * <ul>
+     * <li>Si es {@code EXPENSE}: Calcula y aplica automáticamente reglas de ahorro (redondeo).</li>
+     * <li>Si es {@code INCOME}: Puede registrar el total como ahorro dependiendo de la configuración.</li>
+     * </ul>
+     * Actualiza el saldo global del usuario si se genera un monto de ahorro.
+     * </p>
+     *
+     * @param transactionDTO Objeto de transferencia con los datos crudos de la operación.
+     * @return El DTO de la transacción procesada y guardada, incluyendo montos calculados (redondeo/ahorro).
+     * @throws RuntimeException Si el usuario asociado no existe.
+     */
     @Transactional
     public TransactionDTO createTransaction(TransactionDTO transactionDTO) {
         log.info("Creando transacción para usuario ID: {}", transactionDTO.getUserId());
@@ -62,7 +90,18 @@ public class TransactionService {
         return convertToDTO(savedTransaction);
     }
 
-    // MÉTODO PARA RETIROS
+    /**
+     * Procesa una solicitud de retiro de fondos desde la cuenta de ahorros del usuario hacia una cuenta externa.
+     * <p>
+     * Implementa validaciones estrictas de consistencia para asegurar que el usuario disponga de saldo suficiente
+     * ({@code totalSaved}) antes de autorizar la operación. Decrementa el saldo acumulado en caso de éxito.
+     * </p>
+     *
+     * @param userId Identificador del usuario que solicita el retiro.
+     * @param amount Monto monetario a retirar.
+     * @return El DTO de la transacción de retiro registrada.
+     * @throws RuntimeException Si el usuario no existe o si los fondos son insuficientes (Saldo < Monto).
+     */
     @Transactional
     public TransactionDTO createWithdrawal(Long userId, Double amount) {
         log.info("Procesando retiro de ${} para usuario ID: {}", amount, userId);
@@ -93,6 +132,21 @@ public class TransactionService {
         return convertToDTO(saved);
     }
 
+    /**
+     * Punto de entrada especializado para transacciones detectadas vía notificaciones externas (SMS, Webhooks, Push).
+     * <p>
+     * Simplifica la ingesta de datos clasificando automáticamente la operación como {@code EXPENSE} y
+     * desencadenando el cálculo inmediato del ahorro asociado.
+     * </p>
+     *
+     * @param userId             Identificador del usuario.
+     * @param amount             Monto detectado en la notificación.
+     * @param description        Concepto o descripción extraída del mensaje.
+     * @param merchantName       Nombre del comercio parseado.
+     * @param notificationSource Identificador del origen (ej. "SMS_PARSER").
+     * @param bankReference      Referencia bancaria para conciliación.
+     * @return El DTO de la transacción procesada.
+     */
     @Transactional
     public TransactionDTO processTransactionFromNotification(Long userId, Double amount, String description,
                                                              String merchantName, String notificationSource,
@@ -121,6 +175,18 @@ public class TransactionService {
         }
         return convertToDTO(savedTransaction);
     }
+
+    /**
+     * Aplica la lógica central de cálculo de ahorro basada en la configuración del perfil de usuario.
+     * <p>
+     * Determina el monto a ahorrar usando estrategias de {@code ROUNDING} (redondeo al múltiplo superior)
+     * o {@code PERCENTAGE} (porcentaje fijo). Además, verifica reglas de saldo mínimo seguro (Safe Balance)
+     * para evitar sobregiros, ajustando el monto o cambiando el estado a {@code PENDING} si es necesario.
+     * </p>
+     *
+     * @param transaction La entidad transacción en proceso (se modifica por referencia).
+     * @param user        El usuario propietario con su configuración de ahorro.
+     */
     private void calculateAndApplySaving(Transaction transaction, User user) {
         Double savingAmount = 0.0;
         Double roundedAmount = 0.0;
@@ -163,6 +229,15 @@ public class TransactionService {
         }
     }
 
+    /**
+     * Ejecuta un re-procesamiento de transacciones que quedaron en estado {@code PENDING}.
+     * <p>
+     * Útil cuando el usuario recarga saldo o cambia su configuración de límites, permitiendo
+     * capturar ahorros que previamente fueron pausados por reglas de seguridad.
+     * </p>
+     *
+     * @param userId Identificador del usuario.
+     */
     @Transactional
     public void processPendingTransactions(Long userId) {
         List<Transaction> pending = transactionRepository.findPendingTransactions(userId);
@@ -175,6 +250,14 @@ public class TransactionService {
         }
     }
 
+    /**
+     * Registra un aporte voluntario manual directo al fondo de ahorro.
+     *
+     * @param userId      Identificador del usuario.
+     * @param amount      Monto a depositar.
+     * @param description Nota opcional del depósito.
+     * @return El DTO de la transacción generada.
+     */
     @Transactional
     public TransactionDTO createSavingDeposit(Long userId, Double amount, String description) {
         log.info("Creando depósito de ahorro para usuario ID: {}", userId);
@@ -217,12 +300,28 @@ public class TransactionService {
                 .map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Calcula el total de gastos (egresos) en un periodo específico.
+     *
+     * @param userId    Identificador del usuario.
+     * @param startDate Fecha inicio.
+     * @param endDate   Fecha fin.
+     * @return Suma total de montos de transacciones tipo {@code EXPENSE}.
+     */
     @Transactional(readOnly = true)
     public Double getTotalExpenses(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
         return transactionRepository.sumTransactionsByTypeAndDateRange(
                 userId, Transaction.TransactionType.EXPENSE, startDate, endDate);
     }
 
+    /**
+     * Calcula el total de dinero ahorrado (generado por redondeo o aportes) en un periodo.
+     *
+     * @param userId    Identificador del usuario.
+     * @param startDate Fecha inicio.
+     * @param endDate   Fecha fin.
+     * @return Suma total de montos en el campo {@code savingAmount}.
+     */
     @Transactional(readOnly = true)
     public Double getTotalSavings(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
         return transactionRepository.sumSavingsByDateRange(userId, startDate, endDate);

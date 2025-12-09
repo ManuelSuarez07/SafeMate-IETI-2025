@@ -16,6 +16,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Controlador REST responsable de la gestión de transacciones financieras.
+ *
+ * <p>Responsabilidad: Exponer endpoints HTTP bajo {@code /api/transactions} para crear,
+ * procesar y consultar transacciones del sistema. Traduce solicitudes REST a invocaciones
+ * del {@link TransactionService} y devuelve respuestas estándar {@link ResponseEntity}
+ * con códigos de estado apropiados.
+ */
 @RestController
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor
@@ -25,6 +33,14 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    /**
+     * Crea una nueva transacción a partir del DTO proporcionado.
+     *
+     * @param transactionDTO DTO que contiene los datos de la transacción a crear (userId, amount, type, description, etc.)
+     * @return {@link ResponseEntity} con el {@link TransactionDTO} creado y HTTP 201 (CREATED) en caso de éxito;
+     *         HTTP 400 (BAD_REQUEST) si ocurre un error de validación o creación.
+     * @throws RuntimeException si ocurre un error de negocio durante la creación de la transacción.
+     */
     @PostMapping
     public ResponseEntity<TransactionDTO> createTransaction(@Valid @RequestBody TransactionDTO transactionDTO) {
         log.info("Solicitud para crear transacción para usuario ID: {}", transactionDTO.getUserId());
@@ -37,6 +53,16 @@ public class TransactionController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    /**
+     * Realiza un retiro de fondos para un usuario específico.
+     *
+     * @param userId identificador del usuario que solicita el retiro
+     * @param amount importe a retirar
+     * @return {@link ResponseEntity} con el {@link TransactionDTO} del retiro y HTTP 201 (CREATED) en caso de éxito;
+     *         HTTP 400 (BAD_REQUEST) con mensaje en caso de fondos insuficientes u otro error de negocio.
+     * @throws RuntimeException si el servicio detecta condiciones que impiden procesar el retiro (por ejemplo fondos insuficientes).
+     */
     @PostMapping("/withdraw")
     public ResponseEntity<?> withdrawFunds(
             @RequestParam Long userId,
@@ -53,6 +79,20 @@ public class TransactionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    /**
+     * Procesa una transacción generada a partir de una notificación externa (por ejemplo de banco o proveedor).
+     *
+     * @param userId identificador del usuario asociado a la transacción
+     * @param amount importe de la transacción
+     * @param description descripción de la transacción
+     * @param merchantName nombre del comercio (opcional)
+     * @param notificationSource origen de la notificación (opcional)
+     * @param bankReference referencia bancaria asociada (opcional)
+     * @return {@link ResponseEntity} con el {@link TransactionDTO} creado y HTTP 201 (CREATED) en caso de éxito;
+     *         HTTP 400 (BAD_REQUEST) si ocurre un error al procesar la notificación.
+     * @throws RuntimeException si el servicio no puede procesar la notificación por restricciones de negocio.
+     */
     @PostMapping("/from-notification")
     public ResponseEntity<TransactionDTO> processTransactionFromNotification(
             @RequestParam Long userId,
@@ -73,6 +113,17 @@ public class TransactionController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    /**
+     * Crea un depósito destinado a ahorro para un usuario.
+     *
+     * @param userId identificador del usuario que realiza el depósito
+     * @param amount importe del depósito
+     * @param description descripción del depósito (opcional)
+     * @return {@link ResponseEntity} con el {@link TransactionDTO} creado y HTTP 201 (CREATED) en caso de éxito;
+     *         HTTP 400 (BAD_REQUEST) si ocurre un error durante la creación.
+     * @throws RuntimeException si el servicio encuentra un error de negocio al crear el depósito.
+     */
     @PostMapping("/saving-deposit")
     public ResponseEntity<TransactionDTO> createSavingDeposit(
             @RequestParam Long userId,
@@ -90,6 +141,14 @@ public class TransactionController {
         }
     }
 
+    /**
+     * Procesa las transacciones que se encuentran en estado pendiente para un usuario.
+     *
+     * @param userId identificador del usuario cuyas transacciones pendientes se procesarán
+     * @return {@link ResponseEntity} vacío con HTTP 200 (OK) si la operación se completó correctamente;
+     *         HTTP 500 (INTERNAL_SERVER_ERROR) si ocurre un error durante el procesamiento.
+     * @throws Exception si se produce un error inesperado durante el procesamiento de transacciones pendientes.
+     */
     @PostMapping("/process-pending/{userId}")
     public ResponseEntity<Void> processPendingTransactions(@PathVariable Long userId) {
         log.info("Procesando transacciones pendientes para usuario ID: {}", userId);
@@ -103,6 +162,13 @@ public class TransactionController {
         }
     }
 
+    /**
+     * Obtiene una transacción por su identificador.
+     *
+     * @param id identificador de la transacción solicitada
+     * @return {@link ResponseEntity} con el {@link TransactionDTO} y HTTP 200 (OK) si se encuentra;
+     *         HTTP 404 (NOT_FOUND) si no existe la transacción.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<TransactionDTO> getTransactionById(@PathVariable Long id) {
         log.info("Solicitud para obtener transacción con ID: {}", id);
@@ -112,6 +178,12 @@ public class TransactionController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    /**
+     * Obtiene todas las transacciones de un usuario.
+     *
+     * @param userId identificador del usuario cuyas transacciones se solicitan
+     * @return {@link ResponseEntity} con una lista de {@link TransactionDTO} y HTTP 200 (OK).
+     */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<TransactionDTO>> getTransactionsByUserId(@PathVariable Long userId) {
         log.info("Solicitud para obtener transacciones del usuario ID: {}", userId);
@@ -120,6 +192,13 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
+    /**
+     * Obtiene las transacciones de un usuario filtradas por tipo.
+     *
+     * @param userId identificador del usuario
+     * @param type tipo de transacción conforme a {@link Transaction.TransactionType}
+     * @return {@link ResponseEntity} con una lista de {@link TransactionDTO} filtradas por tipo y HTTP 200 (OK).
+     */
     @GetMapping("/user/{userId}/type/{type}")
     public ResponseEntity<List<TransactionDTO>> getTransactionsByUserIdAndType(
             @PathVariable Long userId,
@@ -131,6 +210,14 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
+    /**
+     * Obtiene las transacciones de un usuario dentro de un rango de fechas.
+     *
+     * @param userId identificador del usuario
+     * @param startDate fecha/hora de inicio (formato ISO_DATE_TIME)
+     * @param endDate fecha/hora de fin (formato ISO_DATE_TIME)
+     * @return {@link ResponseEntity} con una lista de {@link TransactionDTO} dentro del rango y HTTP 200 (OK).
+     */
     @GetMapping("/user/{userId}/date-range")
     public ResponseEntity<List<TransactionDTO>> getTransactionsByDateRange(
             @PathVariable Long userId,
@@ -143,6 +230,14 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
+    /**
+     * Calcula el total de gastos de un usuario en un rango de fechas.
+     *
+     * @param userId identificador del usuario
+     * @param startDate fecha/hora de inicio (formato ISO_DATE_TIME)
+     * @param endDate fecha/hora de fin (formato ISO_DATE_TIME)
+     * @return {@link ResponseEntity} con un {@link Double} que representa el total de gastos; devuelve 0.0 si es nulo.
+     */
     @GetMapping("/user/{userId}/statistics/expenses")
     public ResponseEntity<Double> getTotalExpenses(
             @PathVariable Long userId,
@@ -155,6 +250,14 @@ public class TransactionController {
         return ResponseEntity.ok(totalExpenses != null ? totalExpenses : 0.0);
     }
 
+    /**
+     * Calcula el total de ahorros de un usuario en un rango de fechas.
+     *
+     * @param userId identificador del usuario
+     * @param startDate fecha/hora de inicio (formato ISO_DATE_TIME)
+     * @param endDate fecha/hora de fin (formato ISO_DATE_TIME)
+     * @return {@link ResponseEntity} con un {@link Double} que representa el total de ahorros; devuelve 0.0 si es nulo.
+     */
     @GetMapping("/user/{userId}/statistics/savings")
     public ResponseEntity<Double> getTotalSavings(
             @PathVariable Long userId,
@@ -167,6 +270,16 @@ public class TransactionController {
         return ResponseEntity.ok(totalSavings != null ? totalSavings : 0.0);
     }
 
+    /**
+     * Construye y devuelve un resumen de transacciones, totales y listado para un usuario en un rango de fechas.
+     *
+     * @param userId identificador del usuario para el cual se genera el resumen
+     * @param startDate fecha/hora de inicio (formato ISO_DATE_TIME)
+     * @param endDate fecha/hora de fin (formato ISO_DATE_TIME)
+     * @return {@link ResponseEntity} con {@link TransactionSummaryDTO} que contiene totales y listado de transacciones;
+     *         HTTP 200 (OK) en caso de éxito; HTTP 500 (INTERNAL_SERVER_ERROR) en caso de error.
+     * @throws Exception si ocurre un error durante la agregación de datos para el resumen.
+     */
     @GetMapping("/user/{userId}/statistics/summary")
     public ResponseEntity<TransactionSummaryDTO> getTransactionSummary(
             @PathVariable Long userId,

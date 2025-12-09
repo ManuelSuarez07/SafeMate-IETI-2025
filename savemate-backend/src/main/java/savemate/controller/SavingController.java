@@ -17,6 +17,14 @@ import java.util.List;
 import java.util.Map; // <--- ASEGÚRATE DE TENER ESTE IMPORT
 import java.util.Optional;
 
+/**
+ * Controlador REST responsable de la gestión de metas de ahorro.
+ *
+ * <p>Responsabilidad: Exponer endpoints HTTP bajo {@code /api/savings} para crear, actualizar,
+ * consultar y ejecutar operaciones de negocio relacionadas con las metas de ahorro del sistema.
+ * Traduce solicitudes HTTP a invocaciones del {@link SavingService} y devuelve respuestas estándar
+ * {@link ResponseEntity} con códigos de estado apropiados.
+ */
 @RestController
 @RequestMapping("/api/savings")
 @RequiredArgsConstructor
@@ -26,6 +34,13 @@ public class SavingController {
 
     private final SavingService savingService;
 
+    /**
+     * Crea una nueva meta de ahorro a partir del DTO proporcionado.
+     *
+     * @param savingDTO DTO con los datos de la meta de ahorro a crear (incluye userId, objetivo, monto, fecha, prioridad, etc.)
+     * @return {@link ResponseEntity} con el {@link SavingDTO} creado y estado HTTP 201 (CREATED) en caso de éxito;
+     *         HTTP 400 (BAD_REQUEST) si ocurre un error de validación o creación.
+     */
     @PostMapping
     public ResponseEntity<SavingDTO> createSavingGoal(@Valid @RequestBody SavingDTO savingDTO) {
         log.info("Solicitud para crear meta de ahorro para usuario ID: {}", savingDTO.getUserId());
@@ -38,6 +53,15 @@ public class SavingController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    /**
+     * Actualiza el progreso (monto ahorrado) de una meta de ahorro existente.
+     *
+     * @param id identificador de la meta de ahorro a actualizar
+     * @param payload mapa que debe contener la clave {@code "amount"} con el monto a añadir al progreso
+     * @return {@link ResponseEntity} con el {@link SavingDTO} actualizado y estado HTTP 200 (OK) si existe;
+     *         HTTP 400 (BAD_REQUEST) si el payload no contiene el monto; HTTP 404 (NOT_FOUND) si la meta no existe.
+     */
     @PutMapping("/{id}/progress")
     public ResponseEntity<SavingDTO> updateSavingGoalProgress(
             @PathVariable Long id,
@@ -59,6 +83,15 @@ public class SavingController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    /**
+     * Actualiza el estado de una meta de ahorro (por ejemplo: ACTIVE, COMPLETED, OVERDUE).
+     *
+     * @param id identificador de la meta de ahorro a modificar
+     * @param status nuevo {@link SavingGoal.GoalStatus} que se asignará a la meta
+     * @return {@link ResponseEntity} con el {@link SavingDTO} actualizado y estado HTTP 200 (OK) si existe;
+     *         HTTP 404 (NOT_FOUND) si la meta no se encuentra.
+     */
     @PutMapping("/{id}/status")
     public ResponseEntity<SavingDTO> updateSavingGoalStatus(
             @PathVariable Long id,
@@ -75,6 +108,14 @@ public class SavingController {
         }
     }
 
+    /**
+     * Distribuye un importe total entre las metas de ahorro de un usuario siguiendo la lógica de negocio.
+     *
+     * @param userId identificador del usuario cuyas metas recibirán la distribución
+     * @param totalAmount importe total a distribuir entre las metas del usuario
+     * @return {@link ResponseEntity} vacío con HTTP 200 (OK) si la distribución se ejecutó correctamente;
+     *         HTTP 400 (BAD_REQUEST) en caso de error de negocio.
+     */
     @PostMapping("/distribute/{userId}")
     public ResponseEntity<Void> distributeSavingsToGoals(
             @PathVariable Long userId,
@@ -91,6 +132,12 @@ public class SavingController {
         }
     }
 
+    /**
+     * Verifica metas vencidas y actualiza su estado según la lógica definida.
+     *
+     * @return {@link ResponseEntity} vacío con HTTP 200 (OK) si la operación se completó correctamente;
+     *         HTTP 500 (INTERNAL_SERVER_ERROR) si ocurre un error durante la verificación.
+     */
     @PostMapping("/check-overdue")
     public ResponseEntity<Void> checkOverdueGoals() {
         log.info("Verificando metas de ahorro vencidas");
@@ -104,6 +151,12 @@ public class SavingController {
         }
     }
 
+    /**
+     * Verifica metas completadas y ejecuta acciones asociadas (notificaciones, marcación, etc.).
+     *
+     * @return {@link ResponseEntity} vacío con HTTP 200 (OK) si la operación se completó correctamente;
+     *         HTTP 500 (INTERNAL_SERVER_ERROR) si ocurre un error durante la verificación.
+     */
     @PostMapping("/check-completed")
     public ResponseEntity<Void> checkCompletedGoals() {
         log.info("Verificando metas completadas");
@@ -117,6 +170,13 @@ public class SavingController {
         }
     }
 
+    /**
+     * Obtiene una meta de ahorro por su identificador.
+     *
+     * @param id identificador de la meta solicitada
+     * @return {@link ResponseEntity} con el {@link SavingDTO} y HTTP 200 (OK) si se encuentra;
+     *         HTTP 404 (NOT_FOUND) si no existe la meta.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<SavingDTO> getSavingGoalById(@PathVariable Long id) {
         log.info("Solicitud para obtener meta de ahorro con ID: {}", id);
@@ -126,6 +186,12 @@ public class SavingController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    /**
+     * Obtiene todas las metas de ahorro asociadas a un usuario.
+     *
+     * @param userId identificador del usuario cuyas metas se solicitan
+     * @return {@link ResponseEntity} con una lista de {@link SavingDTO} y HTTP 200 (OK).
+     */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<SavingDTO>> getSavingGoalsByUserId(@PathVariable Long userId) {
         log.info("Solicitud para obtener metas de ahorro del usuario ID: {}", userId);
@@ -134,6 +200,12 @@ public class SavingController {
         return ResponseEntity.ok(goals);
     }
 
+    /**
+     * Obtiene las metas activas de un usuario.
+     *
+     * @param userId identificador del usuario
+     * @return {@link ResponseEntity} con la lista de {@link SavingDTO} activas y HTTP 200 (OK).
+     */
     @GetMapping("/user/{userId}/active")
     public ResponseEntity<List<SavingDTO>> getActiveSavingGoals(@PathVariable Long userId) {
         log.info("Solicitud para obtener metas activas del usuario ID: {}", userId);
@@ -142,6 +214,12 @@ public class SavingController {
         return ResponseEntity.ok(goals);
     }
 
+    /**
+     * Obtiene las metas colaborativas (compartidas) de un usuario.
+     *
+     * @param userId identificador del usuario
+     * @return {@link ResponseEntity} con la lista de metas colaborativas ({@link SavingDTO}) y HTTP 200 (OK).
+     */
     @GetMapping("/user/{userId}/collaborative")
     public ResponseEntity<List<SavingDTO>> getCollaborativeGoals(@PathVariable Long userId) {
         log.info("Solicitud para obtener metas colaborativas del usuario ID: {}", userId);
@@ -150,6 +228,13 @@ public class SavingController {
         return ResponseEntity.ok(goals);
     }
 
+    /**
+     * Obtiene metas de alta prioridad para un usuario aplicando un umbral mínimo.
+     *
+     * @param userId identificador del usuario
+     * @param minPriority umbral mínimo de prioridad (valor por defecto: 3) utilizado para filtrar las metas
+     * @return {@link ResponseEntity} con la lista de {@link SavingDTO} que cumplen la prioridad y HTTP 200 (OK).
+     */
     @GetMapping("/user/{userId}/high-priority")
     public ResponseEntity<List<SavingDTO>> getHighPriorityGoals(
             @PathVariable Long userId,
@@ -161,6 +246,13 @@ public class SavingController {
         return ResponseEntity.ok(goals);
     }
 
+    /**
+     * Obtiene metas que vencen en los próximos días indicados.
+     *
+     * @param userId identificador del usuario
+     * @param daysAhead número de días hacia adelante para considerar la ventana de vencimiento (por defecto: 7)
+     * @return {@link ResponseEntity} con la lista de {@link SavingDTO} que vencen pronto y HTTP 200 (OK).
+     */
     @GetMapping("/user/{userId}/due-soon")
     public ResponseEntity<List<SavingDTO>> getGoalsDueSoon(
             @PathVariable Long userId,
@@ -172,6 +264,13 @@ public class SavingController {
         return ResponseEntity.ok(goals);
     }
 
+    /**
+     * Obtiene el total de ahorros actuales del usuario.
+     *
+     * @param userId identificador del usuario
+     * @return {@link ResponseEntity} con un {@link Double} que representa el total de ahorros actuales;
+     *         devuelve 0.0 si el total es nulo.
+     */
     @GetMapping("/user/{userId}/statistics/current-savings")
     public ResponseEntity<Double> getTotalCurrentSavings(@PathVariable Long userId) {
         log.info("Solicitud para obtener total de ahorros actuales del usuario ID: {}", userId);
@@ -180,6 +279,12 @@ public class SavingController {
         return ResponseEntity.ok(totalSavings != null ? totalSavings : 0.0);
     }
 
+    /**
+     * Obtiene el conteo de metas activas de un usuario.
+     *
+     * @param userId identificador del usuario
+     * @return {@link ResponseEntity} con un {@link Long} representando el conteo de metas activas; devuelve 0 si es nulo.
+     */
     @GetMapping("/user/{userId}/statistics/active-count")
     public ResponseEntity<Long> getActiveGoalsCount(@PathVariable Long userId) {
         log.info("Solicitud para obtener conteo de metas activas del usuario ID: {}", userId);
@@ -188,6 +293,12 @@ public class SavingController {
         return ResponseEntity.ok(count != null ? count : 0L);
     }
 
+    /**
+     * Obtiene el conteo de metas completadas de un usuario.
+     *
+     * @param userId identificador del usuario
+     * @return {@link ResponseEntity} con un {@link Long} representando el conteo de metas completadas; devuelve 0 si es nulo.
+     */
     @GetMapping("/user/{userId}/statistics/completed-count")
     public ResponseEntity<Long> getCompletedGoalsCount(@PathVariable Long userId) {
         log.info("Solicitud para obtener conteo de metas completadas del usuario ID: {}", userId);
@@ -196,6 +307,13 @@ public class SavingController {
         return ResponseEntity.ok(count != null ? count : 0L);
     }
 
+    /**
+     * Construye y devuelve un resumen agregando métricas y listados relevantes de metas de un usuario.
+     *
+     * @param userId identificador del usuario para el cual se genera el resumen
+     * @return {@link ResponseEntity} con {@link SavingSummaryDTO} que contiene métricas agregadas y listados;
+     *         HTTP 200 (OK) en caso de éxito; HTTP 500 (INTERNAL_SERVER_ERROR) en caso de error.
+     */
     @GetMapping("/user/{userId}/statistics/summary")
     public ResponseEntity<SavingSummaryDTO> getSavingSummary(@PathVariable Long userId) {
         log.info("Solicitud para obtener resumen de ahorros del usuario ID: {}", userId);

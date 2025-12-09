@@ -15,6 +15,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio de lógica de negocio encargado de la gestión integral del ciclo de vida de las metas de ahorro.
+ * <p>
+ * Este servicio orquesta las operaciones relacionadas con la planificación financiera a largo plazo del usuario.
+ * Sus responsabilidades principales incluyen:
+ * <ul>
+ * <li>Creación y configuración de objetivos de ahorro (individuales o colaborativos).</li>
+ * <li>Actualización de progresos y detección automática de cumplimiento de metas.</li>
+ * <li>Algoritmos de distribución inteligente de fondos excedentes entre múltiples metas basadas en prioridad.</li>
+ * <li>Generación de reportes y métricas de desempeño financiero (metas vencidas, totales acumulados).</li>
+ * </ul>
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,6 +37,17 @@ public class SavingService {
     private final UserRepository userRepository;
     private final UserService userService;
 
+    /**
+     * Registra una nueva meta de ahorro en el sistema asociada a un usuario existente.
+     * <p>
+     * Inicializa la meta con estado {@code ACTIVE} y establece valores por defecto para campos opcionales
+     * como el monto actual (0.0) y el nivel de prioridad (1) si no son proporcionados.
+     * </p>
+     *
+     * @param savingDTO Objeto de transferencia con la definición de la meta (nombre, monto objetivo, fecha límite).
+     * @return El DTO de la meta persistida, incluyendo el ID generado y las marcas de tiempo de auditoría.
+     * @throws RuntimeException Si el ID de usuario proporcionado no corresponde a un usuario registrado.
+     */
     @Transactional
     public SavingDTO createSavingGoal(SavingDTO savingDTO) {
         log.info("Creando meta de ahorro para usuario ID: {}", savingDTO.getUserId());
@@ -49,6 +73,19 @@ public class SavingService {
         return convertToDTO(savedGoal);
     }
 
+    /**
+     * Incrementa el saldo acumulado de una meta específica y verifica su finalización.
+     * <p>
+     * Este método es transaccional y atómico: actualiza el saldo de la meta y simultáneamente
+     * sincroniza el total ahorrado global del perfil del usuario (vía {@link UserService}).
+     * Si el nuevo saldo iguala o supera el objetivo, la meta cambia automáticamente a estado {@code COMPLETED}.
+     * </p>
+     *
+     * @param goalId           Identificador único de la meta a financiar.
+     * @param additionalAmount Monto monetario positivo a agregar al saldo actual.
+     * @return El DTO actualizado reflejando el nuevo progreso y estado.
+     * @throws RuntimeException Si la meta no existe en la base de datos.
+     */
     @Transactional
     public SavingDTO updateSavingGoalProgress(Long goalId, Double additionalAmount) {
         log.info("Actualizando progreso de meta de ahorro ID: {} con monto: {}", goalId, additionalAmount);
@@ -71,6 +108,15 @@ public class SavingService {
         return convertToDTO(updatedGoal);
     }
 
+    /**
+     * Modifica manualmente el estado administrativo de una meta.
+     * Útil para operaciones de pausado, cancelación o reactivación de objetivos.
+     *
+     * @param goalId    Identificador de la meta.
+     * @param newStatus Nuevo estado a asignar (ej. {@code PAUSED}, {@code CANCELLED}).
+     * @return El DTO actualizado.
+     * @throws RuntimeException Si la meta no es encontrada.
+     */
     @Transactional
     public SavingDTO updateSavingGoalStatus(Long goalId, SavingGoal.GoalStatus newStatus) {
         log.info("Actualizando estado de meta de ahorro ID: {} a: {}", goalId, newStatus);
@@ -88,6 +134,18 @@ public class SavingService {
         return convertToDTO(updatedGoal);
     }
 
+    /**
+     * Ejecuta un algoritmo de distribución de fondos para asignar un monto global entre múltiples metas activas.
+     * <p>
+     * La lógica de distribución prioriza las metas según su {@code priorityLevel}.
+     * El cálculo intenta equilibrar el aporte pero otorga un peso adicional (multiplicador)
+     * a las metas más importantes. Si una meta se completa durante la distribución,
+     * el estado se actualiza y el remanente se intenta asignar a las siguientes.
+     * </p>
+     *
+     * @param userId      Identificador del usuario propietario de los fondos.
+     * @param totalAmount Monto total disponible para repartir (bolsa de ahorro).
+     */
     @Transactional
     public void distributeSavingsToGoals(Long userId, Double totalAmount) {
         log.info("Distribuyendo ahorros de {} a metas del usuario ID: {}", totalAmount, userId);
@@ -126,6 +184,10 @@ public class SavingService {
         }
     }
 
+    /**
+     * Proceso de monitoreo (potencialmente programado) que identifica metas cuya fecha límite ha expirado.
+     * Actualmente registra los hallazgos en el log para auditoría o alertas.
+     */
     @Transactional
     public void checkAndUpdateOverdueGoals() {
         LocalDateTime now = LocalDateTime.now();
@@ -139,6 +201,11 @@ public class SavingService {
         }
     }
 
+    /**
+     * Proceso de saneamiento de datos que busca y corrige inconsistencias de estado.
+     * Detecta metas que financieramente han alcanzado su objetivo ({@code current >= target})
+     * pero que no figuran como {@code COMPLETED}, actualizándolas automáticamente.
+     */
     @Transactional
     public void checkCompletedGoals() {
         List<SavingGoal> allGoals = savingRepository.findAll();
@@ -152,17 +219,35 @@ public class SavingService {
         }
     }
 
+    /**
+     * Recupera una meta específica por su identificador.
+     *
+     * @param id Identificador de la meta.
+     * @return Un {@link Optional} conteniendo el DTO si se encuentra.
+     */
     @Transactional(readOnly = true)
     public Optional<SavingDTO> getSavingGoalById(Long id) {
         return savingRepository.findById(id).map(this::convertToDTO);
     }
 
+    /**
+     * Obtiene todas las metas de un usuario ordenadas por prioridad.
+     *
+     * @param userId Identificador del usuario.
+     * @return Lista de metas.
+     */
     @Transactional(readOnly = true)
     public List<SavingDTO> getSavingGoalsByUserId(Long userId) {
         return savingRepository.findByUserIdOrderByPriorityLevelDesc(userId).stream()
                 .map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Filtra y retorna únicamente las metas que se encuentran en estado ACTIVO.
+     *
+     * @param userId Identificador del usuario.
+     * @return Lista de metas activas.
+     */
     @Transactional(readOnly = true)
     public List<SavingDTO> getActiveSavingGoals(Long userId) {
         return savingRepository.findByUserIdAndStatusOrderByPriorityLevelDesc(
@@ -170,33 +255,72 @@ public class SavingService {
                 .map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Recupera las metas marcadas como colaborativas o grupales.
+     *
+     * @param userId Identificador del usuario.
+     * @return Lista de metas compartidas.
+     */
     @Transactional(readOnly = true)
     public List<SavingDTO> getCollaborativeGoals(Long userId) {
         return savingRepository.findCollaborativeGoals(userId).stream()
                 .map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Obtiene metas que superan un umbral de prioridad específico.
+     *
+     * @param userId      Identificador del usuario.
+     * @param minPriority Prioridad mínima requerida.
+     * @return Lista de metas de alta prioridad.
+     */
     @Transactional(readOnly = true)
     public List<SavingDTO> getHighPriorityGoals(Long userId, Integer minPriority) {
         return savingRepository.findHighPriorityGoals(userId, minPriority).stream()
                 .map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Calcula la suma total del dinero reservado en todas las metas del usuario.
+     *
+     * @param userId Identificador del usuario.
+     * @return Monto total acumulado (Double).
+     */
     @Transactional(readOnly = true)
     public Double getTotalCurrentSavings(Long userId) {
         return savingRepository.sumCurrentSavings(userId);
     }
 
+    /**
+     * Cuenta el número de metas actualmente en curso.
+     *
+     * @param userId Identificador del usuario.
+     * @return Cantidad de metas activas.
+     */
     @Transactional(readOnly = true)
     public Long countActiveGoals(Long userId) {
         return savingRepository.countActiveGoals(userId);
     }
 
+    /**
+     * Cuenta el número histórico de metas completadas exitosamente.
+     *
+     * @param userId Identificador del usuario.
+     * @return Cantidad de metas completadas.
+     */
     @Transactional(readOnly = true)
     public Long countCompletedGoals(Long userId) {
         return savingRepository.countCompletedGoals(userId);
     }
 
+    /**
+     * Identifica las metas próximas a vencer dentro de un horizonte temporal dado.
+     * Útil para generar alertas tempranas o notificaciones push.
+     *
+     * @param userId    Identificador del usuario.
+     * @param daysAhead Número de días a proyectar hacia el futuro para la búsqueda.
+     * @return Lista de metas que vencen en el rango [hoy, hoy + daysAhead].
+     */
     @Transactional(readOnly = true)
     public List<SavingDTO> getGoalsDueSoon(Long userId, int daysAhead) {
         LocalDateTime futureDate = LocalDateTime.now().plusDays(daysAhead);
