@@ -78,12 +78,44 @@ Sugiere:
 
 ---
 
-## 💰 Modelo de monetización (MVP)
+# 💰 Modelo de Monetización – SaveMate (MVP)
 
-- **Comisión del 2.5%** del total ahorrado al finalizar el mes.
+SaveMate opera bajo un modelo **Freemium**, permitiendo que cualquier usuario acceda a funciones esenciales sin costo, mientras que quienes deseen herramientas avanzadas pueden optar por la versión Premium.
 
-Ejemplo:  
-Si un usuario ahorra **$200.000 → SaveMate cobra $5.000**
+---
+
+## 🆓 Plan Gratuito (Freemium)
+
+Incluye acceso a las funcionalidades básicas:
+
+- Ahorro automático
+- Ahorro por redondeo al siguiente valor natural
+- Sin acceso a configuraciones avanzadas ni a inteligencia artificial
+
+Ideal para usuarios que apenas comienzan a organizar sus finanzas.
+
+---
+
+## ⭐ Plan Premium – **$12.000 COP / mes**
+
+Incluye todas las funciones del plan gratuito y además:
+
+- Acceso a metas de ahorro
+- Recomendaciones personalizadas por Inteligencia Artificial
+- Más opciones de ahorro avanzado
+- Redondeo configurado a múltiplos de **$2.000**, **$5.000** o **$10.000**
+- Ahorro por porcentaje según ingresos, gastos o metas
+
+Diseñado para usuarios que buscan optimizar y acelerar su crecimiento financiero.
+
+---
+
+## 💵 Comisión por transacciones
+
+Aplica para todos los usuarios, gratuitos o Premium:
+
+- Comisión del **2%** por cada transferencia hacia otros bancos
+- Comisión del **2%** en retiros
 
 ---
 
