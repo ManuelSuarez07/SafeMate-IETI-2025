@@ -8,12 +8,9 @@ import java.math.RoundingMode;
 
 /**
  * Componente utilitario de cálculo financiero especializado en operaciones de redondeo y proyección de ahorros.
- * <p>
  * Esta clase encapsula la lógica aritmética necesaria para implementar las estrategias de "Micro-Ahorro" (Spare Change).
  * Utiliza internamente {@link BigDecimal} para garantizar la precisión decimal y evitar errores de coma flotante
  * inherentes a los tipos primitivos cuando se maneja dinero.
- * </p>
- * <p>
  * Sus responsabilidades incluyen:
  * <ul>
  * <li>Cálculo de techos y pisos de redondeo basados en múltiplos configurables (ej. redondear a la siguiente centena o mil).</li>
@@ -21,7 +18,6 @@ import java.math.RoundingMode;
  * <li>Simulación de escenarios y proyección de impacto financiero.</li>
  * <li>Validaciones heurísticas para asegurar la razonabilidad de los montos a debitar.</li>
  * </ul>
- * </p>
  */
 @Component
 @Slf4j
@@ -29,10 +25,8 @@ public class RoundingUtils {
 
     /**
      * Calcula el redondeo de un monto monetario hacia arriba (Techo) ajustándose al múltiplo base proporcionado.
-     * <p>
      * Implementa la lógica principal del ahorro por redondeo ("Spare Change"). Por ejemplo, si el monto es
      * $4,200 y el múltiplo es 1,000, el resultado será $5,000.
-     * </p>
      *
      * @param amount   Monto base de la transacción original.
      * @param multiple Base numérica para el redondeo (ej. 100, 1000, 5000). Debe ser mayor a 0.
@@ -63,10 +57,8 @@ public class RoundingUtils {
 
     /**
      * Calcula el redondeo de un monto hacia abajo (Piso) ajustándose al múltiplo base.
-     * <p>
      * Útil para estimaciones conservadoras o cálculos de base imponible.
      * Por ejemplo, si el monto es $4,800 y el múltiplo es 1,000, el resultado será $4,000.
-     * </p>
      *
      * @param amount   Monto base.
      * @param multiple Base numérica para el redondeo.
@@ -97,10 +89,8 @@ public class RoundingUtils {
 
     /**
      * Determina el diferencial monetario exacto generado por la operación de redondeo.
-     * <p>
      * Este valor representa el monto real que será transferido a la cuenta de ahorros.
      * Fórmula: {@code roundedAmount - originalAmount}.
-     * </p>
      *
      * @param originalAmount Monto real de la transacción.
      * @param roundedAmount  Monto proyectado después del redondeo.
@@ -137,10 +127,8 @@ public class RoundingUtils {
 
     /**
      * Sugiere un múltiplo de redondeo óptimo basado en la magnitud del gasto.
-     * <p>
      * Implementa una lógica escalonada para maximizar el ahorro sin generar un impacto excesivo
      * en el flujo de caja del usuario para transacciones pequeñas.
-     * </p>
      *
      * @param amount Monto de la transacción a analizar.
      * @return Entero representando el múltiplo recomendado (1000, 5000, 10000, etc.).
@@ -190,10 +178,8 @@ public class RoundingUtils {
 
     /**
      * Ejecuta múltiples estrategias de ahorro en paralelo sobre un mismo monto para fines comparativos.
-     * <p>
      * Genera un reporte útil para interfaces de usuario donde se le permite al cliente visualizar
      * "qué pasaría si" configurara diferentes niveles de agresividad en el ahorro.
-     * </p>
      *
      * @param amount Monto base para la simulación.
      * @return Mapa estructurado con los resultados de diferentes escenarios (Redondeo a 1k, 5k, 10k y Porcentaje).
@@ -242,10 +228,8 @@ public class RoundingUtils {
 
     /**
      * Aplica una regla heurística de seguridad (Sanity Check) para validar si el monto de ahorro calculado es prudente.
-     * <p>
      * Previene situaciones anómalas donde el redondeo podría ser desproporcionado respecto al gasto original
      * (ej. ahorrar más del 50% del valor de la compra), lo cual podría afectar la liquidez inmediata del usuario.
-     * </p>
      *
      * @param originalAmount Monto de la transacción.
      * @param savingAmount   Monto calculado para debitar como ahorro.

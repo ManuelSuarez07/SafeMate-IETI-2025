@@ -12,7 +12,6 @@ import java.util.List;
 /**
  * Componente de acceso a datos (Repository) encargado de la persistencia y gestión del ciclo de vida
  * de las metas de ahorro ({@link SavingGoal}).
- * <p>
  * Esta interfaz extiende las capacidades CRUD estándar de JPA con consultas estratégicas diseñadas para:
  * <ul>
  * <li>El monitoreo del progreso financiero (sumas de saldos y objetivos).</li>
@@ -20,7 +19,6 @@ import java.util.List;
  * <li>La detección de inconsistencias de estado (metas completadas financieramente pero no marcadas).</li>
  * <li>La generación de métricas para el tablero de control del usuario.</li>
  * </ul>
- * </p>
  */
 @Repository
 public interface SavingRepository extends JpaRepository<SavingGoal, Long> {
@@ -46,10 +44,8 @@ public interface SavingRepository extends JpaRepository<SavingGoal, Long> {
 
     /**
      * Identifica las metas activas cuya fecha límite de cumplimiento es anterior o igual a una fecha dada.
-     * <p>
      * Esta consulta es crítica para el sistema de notificaciones y alertas tempranas, permitiendo avisar
      * al usuario sobre objetivos que requieren atención inmediata o están en riesgo de incumplimiento.
-     * </p>
      *
      * @param userId Identificador del usuario.
      * @param date   Fecha de corte para la evaluación (usualmente {@code LocalDateTime.now()}).
@@ -60,10 +56,8 @@ public interface SavingRepository extends JpaRepository<SavingGoal, Long> {
 
     /**
      * Detecta metas que han alcanzado su objetivo financiero pero cuyo estado no ha sido actualizado.
-     * <p>
      * Utilizada habitualmente por procesos de mantenimiento o sincronización para garantizar la consistencia
      * eventual de los datos, cerrando automáticamente metas que ya cumplieron su propósito monetario.
-     * </p>
      *
      * @param userId Identificador del usuario.
      * @return Lista de metas con saldo suficiente ({@code current >= target}) que aún no están en estado {@code COMPLETED}.
@@ -102,10 +96,8 @@ public interface SavingRepository extends JpaRepository<SavingGoal, Long> {
 
     /**
      * Agrega el capital total real acumulado por el usuario a través de todas sus metas.
-     * <p>
      * Suma los saldos actuales ({@code currentAmount}) de todas las metas, independientemente de su estado,
      * proporcionando una visión del patrimonio líquido total reservado en la plataforma.
-     * </p>
      *
      * @param userId Identificador del usuario.
      * @return Suma total (Double) del dinero ahorrado actualmente. Puede ser nulo.
@@ -124,11 +116,9 @@ public interface SavingRepository extends JpaRepository<SavingGoal, Long> {
 
     /**
      * Filtra y recupera metas que superan un umbral de prioridad específico.
-     * <p>
      * Los resultados se ordenan primariamente por prioridad (de mayor a menor) y secundariamente
      * por fecha de vencimiento (las más próximas primero), facilitando la toma de decisiones sobre
      * dónde asignar fondos disponibles.
-     * </p>
      *
      * @param userId      Identificador del usuario.
      * @param minPriority Nivel mínimo de prioridad (inclusive) para incluir en la búsqueda.

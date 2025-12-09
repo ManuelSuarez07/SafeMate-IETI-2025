@@ -47,7 +47,6 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
      * @param request petición HTTP entrante que puede contener el encabezado Authorization
      * @param response respuesta HTTP asociada a la petición
      * @param filterChain cadena de filtros a la que delegar la petición después del procesamiento
-     * @return void (no devuelve valor); el método tiene efectos secundarios sobre el {@link SecurityContextHolder} y la cadena de filtros
      * @throws ServletException si ocurre un error de tipo servlet durante el filtrado
      * @throws IOException si ocurre un error de E/S al procesar la petición/respuesta
      */

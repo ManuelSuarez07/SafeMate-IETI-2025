@@ -13,14 +13,12 @@ import java.util.List;
 
 /**
  * Entidad raíz de persistencia que representa al usuario registrado en el ecosistema financiero.
- * <p>
  * Esta clase centraliza tres responsabilidades críticas del dominio:
  * <ol>
  * <li><strong>Identidad y Acceso:</strong> Gestión de credenciales (hash de contraseña) y datos de contacto verificados.</li>
  * <li><strong>Configuración del Motor de Ahorro:</strong> Almacena los parámetros que dictan cómo se ejecutan los algoritmos de ahorro automático (estrategia de redondeo vs. porcentaje, umbrales de seguridad).</li>
  * <li><strong>Relacionamiento:</strong> Actúa como la entidad ancla (Owner) para la integridad referencial de transacciones, metas y recomendaciones de IA.</li>
  * </ol>
- * </p>
  */
 @Entity
 @Table(name = "users")
@@ -109,10 +107,8 @@ public class User {
 
     /**
      * Establece la política de manejo de excepciones financieras cuando el usuario carece de liquidez.
-     * <p>
      * Controla si el sistema debe abortar el ahorro, intentar ejecutarlo parcialmente hasta el límite de seguridad,
      * o encolarlo para un reintento posterior.
-     * </p>
      */
     public enum InsufficientBalanceOption {
         NO_SAVING,

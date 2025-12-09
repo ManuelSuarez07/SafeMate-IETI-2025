@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 /**
  * Servicio de lógica de negocio responsable de la orquestación e integración con motores de
  * Inteligencia Artificial Generativa (específicamente Google Gemini).
- * <p>
  * Este servicio actúa como un puente entre los datos financieros transaccionales del usuario y
  * los modelos de lenguaje grande (LLM). Sus responsabilidades principales incluyen:
  * <ul>
@@ -37,7 +36,6 @@ import java.util.stream.Collectors;
  * <li>Gestión del ciclo de vida de las recomendaciones (generación, persistencia, aplicación y expiración).</li>
  * <li>Comunicación HTTP con la API externa de Gemini y parseo resiliente de respuestas JSON.</li>
  * </ul>
- * </p>
  */
 @Service
 @RequiredArgsConstructor
@@ -94,13 +92,11 @@ public class AIService {
 
     /**
      * Motor principal de análisis financiero. Orquesta el flujo completo de generación de insights con IA.
-     * <p>
      * El flujo de ejecución es:
      * 1. Recupera el historial transaccional de los últimos 3 meses.
      * 2. Agrega y resume los datos para minimizar el consumo de tokens.
      * 3. Construye un prompt especializado solicitando una respuesta en formato JSON estricto.
      * 4. Invoca la API de Gemini y procesa la respuesta para persistir las nuevas sugerencias.
-     * </p>
      *
      * @param userId Identificador del usuario sobre el cual se realizará el análisis.
      * @throws RuntimeException Si el usuario no existe. Los errores de la API de IA se capturan y loguean (no relanzan excepción).
@@ -326,9 +322,7 @@ public class AIService {
     /**
      * Tarea de mantenimiento que busca recomendaciones pendientes cuya fecha de validez ha expirado
      * y actualiza su estado a {@code EXPIRED}.
-     * <p>
      * Se recomienda invocar este método mediante un programador de tareas (ej. @Scheduled).
-     * </p>
      */
     @Transactional
     public void cleanupExpiredRecommendations() {

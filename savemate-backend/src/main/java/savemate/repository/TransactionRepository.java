@@ -11,7 +11,6 @@ import java.util.List;
 
 /**
  * Componente de acceso a datos (Repository) responsable de la gestión y análisis del historial transaccional.
- * <p>
  * Además de las operaciones CRUD estándar, esta interfaz actúa como un motor de reportes ligero.
  * Implementa consultas agregadas optimizadas para:
  * <ul>
@@ -19,7 +18,6 @@ import java.util.List;
  * <li>Determinar el volumen total de ahorro generado por redondeos o automatización.</li>
  * <li>Identificar patrones de consumo (top comercios) para la inteligencia de negocios.</li>
  * </ul>
- * </p>
  */
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
@@ -69,10 +67,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     /**
      * Calcula la suma monetaria total de un tipo específico de transacción en un periodo dado.
-     * <p>
      * Realiza la agregación directamente en la base de datos para optimizar el rendimiento.
      * Ideal para calcular "Total Gastado este mes" o "Total Ingresos este año".
-     * </p>
      *
      * @param userId    Identificador del usuario.
      * @param type      Tipo de transacción a sumar (ej. {@code EXPENSE}).
@@ -88,10 +84,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     /**
      * Agrega exclusivamente los montos que han sido destinados al ahorro (campo {@code savingAmount}).
-     * <p>
      * Esta consulta ignora el monto principal de la transacción y suma solo la porción de "micro-ahorro"
      * o redondeo generado en el rango de fechas.
-     * </p>
      *
      * @param userId    Identificador del usuario.
      * @param startDate Inicio del periodo.
@@ -121,10 +115,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     /**
      * Genera un reporte de inteligencia de gastos agrupado por comercio (Merchant).
-     * <p>
      * Identifica en qué lugares gasta más dinero el usuario. Filtra solo transacciones de tipo {@code EXPENSE}.
      * El resultado se ordena descendente por el monto total gastado.
-     * </p>
      *
      * @param userId    Identificador del usuario.
      * @param startDate Inicio del periodo de análisis.

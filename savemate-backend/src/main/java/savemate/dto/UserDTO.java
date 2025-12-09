@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 /**
  * Objeto de Transferencia de Datos (DTO) que centraliza la gestión del perfil de usuario, credenciales y
  * configuraciones paramétricas del sistema de ahorro.
- * <p>
  * Esta clase actúa como la interfaz principal de datos entre el cliente (Frontend/Móvil) y el núcleo de negocio.
  * Sus responsabilidades clave incluyen:
  * <ul>
@@ -22,7 +21,6 @@ import java.time.LocalDateTime;
  * <li>Protección de credenciales mediante control de serialización (campo password de solo escritura).</li>
  * <li>Transporte de configuraciones financieras (reglas de redondeo, cuentas bancarias).</li>
  * </ul>
- * </p>
  */
 @Data
 @NoArgsConstructor
@@ -88,10 +86,8 @@ public class UserDTO {
 
     /**
      * Inicializa un DTO especializado para la actualización de la configuración del motor de ahorro.
-     * <p>
      * Permite aislar la lógica de configuración financiera (estrategias de redondeo, porcentajes,
      * límites de seguridad) del resto de datos personales, facilitando endpoints dedicados a "Settings".
-     * </p>
      *
      * @param id                        Identificador único del usuario a configurar.
      * @param savingType                Modalidad de ahorro seleccionada (ej. REDONDEO, PORCENTAJE).

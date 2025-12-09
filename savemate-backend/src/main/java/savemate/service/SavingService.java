@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 /**
  * Servicio de lógica de negocio encargado de la gestión integral del ciclo de vida de las metas de ahorro.
- * <p>
  * Este servicio orquesta las operaciones relacionadas con la planificación financiera a largo plazo del usuario.
  * Sus responsabilidades principales incluyen:
  * <ul>
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
  * <li>Algoritmos de distribución inteligente de fondos excedentes entre múltiples metas basadas en prioridad.</li>
  * <li>Generación de reportes y métricas de desempeño financiero (metas vencidas, totales acumulados).</li>
  * </ul>
- * </p>
  */
 @Service
 @RequiredArgsConstructor
@@ -39,10 +37,8 @@ public class SavingService {
 
     /**
      * Registra una nueva meta de ahorro en el sistema asociada a un usuario existente.
-     * <p>
      * Inicializa la meta con estado {@code ACTIVE} y establece valores por defecto para campos opcionales
      * como el monto actual (0.0) y el nivel de prioridad (1) si no son proporcionados.
-     * </p>
      *
      * @param savingDTO Objeto de transferencia con la definición de la meta (nombre, monto objetivo, fecha límite).
      * @return El DTO de la meta persistida, incluyendo el ID generado y las marcas de tiempo de auditoría.
@@ -75,11 +71,9 @@ public class SavingService {
 
     /**
      * Incrementa el saldo acumulado de una meta específica y verifica su finalización.
-     * <p>
      * Este método es transaccional y atómico: actualiza el saldo de la meta y simultáneamente
      * sincroniza el total ahorrado global del perfil del usuario (vía {@link UserService}).
      * Si el nuevo saldo iguala o supera el objetivo, la meta cambia automáticamente a estado {@code COMPLETED}.
-     * </p>
      *
      * @param goalId           Identificador único de la meta a financiar.
      * @param additionalAmount Monto monetario positivo a agregar al saldo actual.
@@ -136,12 +130,10 @@ public class SavingService {
 
     /**
      * Ejecuta un algoritmo de distribución de fondos para asignar un monto global entre múltiples metas activas.
-     * <p>
      * La lógica de distribución prioriza las metas según su {@code priorityLevel}.
      * El cálculo intenta equilibrar el aporte pero otorga un peso adicional (multiplicador)
      * a las metas más importantes. Si una meta se completa durante la distribución,
      * el estado se actualiza y el remanente se intenta asignar a las siguientes.
-     * </p>
      *
      * @param userId      Identificador del usuario propietario de los fondos.
      * @param totalAmount Monto total disponible para repartir (bolsa de ahorro).

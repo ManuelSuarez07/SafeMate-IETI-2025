@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 /**
  * Servicio de dominio responsable de la gestión del ciclo de vida de los usuarios, seguridad de credenciales
  * y configuración de preferencias financieras.
- * <p>
  * Este componente actúa como la fachada principal para todas las operaciones relacionadas con la identidad
  * y el perfil del usuario. Sus responsabilidades incluyen:
  * <ul>
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
  * <li>Gestión granular de la configuración del motor de ahorro (estrategias de redondeo, umbrales de seguridad).</li>
  * <li>Sincronización del saldo contable total del usuario.</li>
  * </ul>
- * </p>
  */
 @Service
 @RequiredArgsConstructor
@@ -40,11 +38,9 @@ public class UserService {
 
     /**
      * Registra un nuevo usuario en la plataforma, estableciendo su identidad y configuración inicial.
-     * <p>
      * Este método realiza validaciones críticas de negocio (unicidad de email, obligatoriedad de campos)
      * y se encarga de proteger la contraseña utilizando un algoritmo de hash seguro (vía {@link PasswordEncoder})
      * antes de la persistencia.
-     * </p>
      *
      * @param userDTO Objeto de transferencia con los datos de registro (nombre, email, password plano, config inicial).
      * @return El DTO del usuario creado, excluyendo la contraseña pero incluyendo el ID generado y fechas de auditoría.
@@ -125,10 +121,8 @@ public class UserService {
 
     /**
      * Actualiza la información básica de perfil (demográfica y de contacto).
-     * <p>
      * Ignora campos sensibles como contraseña o configuración financiera, los cuales
      * deben actualizarse a través de sus métodos especializados.
-     * </p>
      *
      * @param id      Identificador del usuario a modificar.
      * @param userDTO DTO conteniendo los nuevos valores para nombre, apellido o teléfono.
@@ -158,10 +152,8 @@ public class UserService {
 
     /**
      * Actualiza los parámetros del algoritmo de ahorro automático utilizando un objeto tipado.
-     * <p>
      * Permite reconfigurar la estrategia (Redondeo vs Porcentaje), los multiplicadores y
      * los umbrales de seguridad financiera (Saldo mínimo).
-     * </p>
      *
      * @param id        Identificador del usuario.
      * @param configDTO DTO que encapsula la nueva configuración financiera.
@@ -220,11 +212,9 @@ public class UserService {
 
     /**
      * Actualiza dinámicamente la configuración de ahorro mediante un mapa de valores (estilo PATCH).
-     * <p>
      * Este método ofrece flexibilidad para interfaces de usuario que envían actualizaciones parciales,
      * parseando y convirtiendo los valores del mapa a los tipos de datos del modelo de dominio.
      * Soporta la actualización de Enumeraciones y valores numéricos.
-     * </p>
      *
      * @param userId  Identificador del usuario.
      * @param updates Mapa clave-valor con los campos a modificar.
@@ -281,10 +271,8 @@ public class UserService {
 
     /**
      * Actualiza el saldo contable total acumulado por el usuario.
-     * <p>
      * Este método es de uso interno (invocado principalmente por el servicio de transacciones)
      * y maneja tanto incrementos (ahorros) como decrementos (retiros) mediante la suma algebraica.
-     * </p>
      *
      * @param userId Identificador del usuario.
      * @param amount Cantidad a sumar al saldo actual (puede ser negativo para restas).

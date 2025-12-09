@@ -28,7 +28,6 @@ public class WebConfig implements WebMvcConfigurer {
      * </ul>
      *
      * @param registry instancia de {@link CorsRegistry} utilizada para registrar los mappings CORS
-     * @return void — el método no devuelve valor; modifica la configuración MVC registrando reglas CORS
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {

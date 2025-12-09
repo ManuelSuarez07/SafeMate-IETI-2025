@@ -22,7 +22,7 @@ import java.util.Optional;
  * <p>Responsabilidad: Exponer endpoints HTTP bajo {@code /api/transactions} para crear,
  * procesar y consultar transacciones del sistema. Traduce solicitudes REST a invocaciones
  * del {@link TransactionService} y devuelve respuestas estándar {@link ResponseEntity}
- * con códigos de estado apropiados.
+ * con códigos de estado apropiados.</p>
  */
 @RestController
 @RequestMapping("/api/transactions")
@@ -38,8 +38,7 @@ public class TransactionController {
      *
      * @param transactionDTO DTO que contiene los datos de la transacción a crear (userId, amount, type, description, etc.)
      * @return {@link ResponseEntity} con el {@link TransactionDTO} creado y HTTP 201 (CREATED) en caso de éxito;
-     *         HTTP 400 (BAD_REQUEST) si ocurre un error de validación o creación.
-     * @throws RuntimeException si ocurre un error de negocio durante la creación de la transacción.
+     * HTTP 400 (BAD_REQUEST) si ocurre un error de validación o creación.
      */
     @PostMapping
     public ResponseEntity<TransactionDTO> createTransaction(@Valid @RequestBody TransactionDTO transactionDTO) {
@@ -60,8 +59,7 @@ public class TransactionController {
      * @param userId identificador del usuario que solicita el retiro
      * @param amount importe a retirar
      * @return {@link ResponseEntity} con el {@link TransactionDTO} del retiro y HTTP 201 (CREATED) en caso de éxito;
-     *         HTTP 400 (BAD_REQUEST) con mensaje en caso de fondos insuficientes u otro error de negocio.
-     * @throws RuntimeException si el servicio detecta condiciones que impiden procesar el retiro (por ejemplo fondos insuficientes).
+     * HTTP 400 (BAD_REQUEST) con mensaje en caso de fondos insuficientes u otro error de negocio.
      */
     @PostMapping("/withdraw")
     public ResponseEntity<?> withdrawFunds(
@@ -90,8 +88,7 @@ public class TransactionController {
      * @param notificationSource origen de la notificación (opcional)
      * @param bankReference referencia bancaria asociada (opcional)
      * @return {@link ResponseEntity} con el {@link TransactionDTO} creado y HTTP 201 (CREATED) en caso de éxito;
-     *         HTTP 400 (BAD_REQUEST) si ocurre un error al procesar la notificación.
-     * @throws RuntimeException si el servicio no puede procesar la notificación por restricciones de negocio.
+     * HTTP 400 (BAD_REQUEST) si ocurre un error al procesar la notificación.
      */
     @PostMapping("/from-notification")
     public ResponseEntity<TransactionDTO> processTransactionFromNotification(
@@ -121,8 +118,7 @@ public class TransactionController {
      * @param amount importe del depósito
      * @param description descripción del depósito (opcional)
      * @return {@link ResponseEntity} con el {@link TransactionDTO} creado y HTTP 201 (CREATED) en caso de éxito;
-     *         HTTP 400 (BAD_REQUEST) si ocurre un error durante la creación.
-     * @throws RuntimeException si el servicio encuentra un error de negocio al crear el depósito.
+     * HTTP 400 (BAD_REQUEST) si ocurre un error durante la creación.
      */
     @PostMapping("/saving-deposit")
     public ResponseEntity<TransactionDTO> createSavingDeposit(
@@ -146,8 +142,7 @@ public class TransactionController {
      *
      * @param userId identificador del usuario cuyas transacciones pendientes se procesarán
      * @return {@link ResponseEntity} vacío con HTTP 200 (OK) si la operación se completó correctamente;
-     *         HTTP 500 (INTERNAL_SERVER_ERROR) si ocurre un error durante el procesamiento.
-     * @throws Exception si se produce un error inesperado durante el procesamiento de transacciones pendientes.
+     * HTTP 500 (INTERNAL_SERVER_ERROR) si ocurre un error durante el procesamiento.
      */
     @PostMapping("/process-pending/{userId}")
     public ResponseEntity<Void> processPendingTransactions(@PathVariable Long userId) {
@@ -167,7 +162,7 @@ public class TransactionController {
      *
      * @param id identificador de la transacción solicitada
      * @return {@link ResponseEntity} con el {@link TransactionDTO} y HTTP 200 (OK) si se encuentra;
-     *         HTTP 404 (NOT_FOUND) si no existe la transacción.
+     * HTTP 404 (NOT_FOUND) si no existe la transacción.
      */
     @GetMapping("/{id}")
     public ResponseEntity<TransactionDTO> getTransactionById(@PathVariable Long id) {
@@ -277,8 +272,7 @@ public class TransactionController {
      * @param startDate fecha/hora de inicio (formato ISO_DATE_TIME)
      * @param endDate fecha/hora de fin (formato ISO_DATE_TIME)
      * @return {@link ResponseEntity} con {@link TransactionSummaryDTO} que contiene totales y listado de transacciones;
-     *         HTTP 200 (OK) en caso de éxito; HTTP 500 (INTERNAL_SERVER_ERROR) en caso de error.
-     * @throws Exception si ocurre un error durante la agregación de datos para el resumen.
+     * HTTP 200 (OK) en caso de éxito; HTTP 500 (INTERNAL_SERVER_ERROR) en caso de error.
      */
     @GetMapping("/user/{userId}/statistics/summary")
     public ResponseEntity<TransactionSummaryDTO> getTransactionSummary(

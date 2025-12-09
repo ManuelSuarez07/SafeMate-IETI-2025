@@ -62,7 +62,6 @@ public class AIRecommendationDTO {
      * @param confidenceScore puntuación de confianza de la recomendación (0.0 - 1.0)
      * @param category categoría o etiqueta de la recomendación (p. ej. "optimization", "configuration")
      * @param priorityLevel nivel de prioridad de la recomendación (valores mayores indican mayor prioridad)
-     * @return instancia de {@link AIRecommendationDTO} inicializada para creación
      */
     public AIRecommendationDTO(Long userId, AIRecommendation.RecommendationType recommendationType,
                                String title, String description, String actionText,
@@ -92,7 +91,6 @@ public class AIRecommendationDTO {
      * @param description descripción de la recomendación
      * @param potentialSavings ahorro potencial estimado
      * @param confidenceScore puntuación de confianza de la recomendación
-     * @return instancia de {@link AIRecommendationDTO} tipificada como SAVING_OPTIMIZATION
      */
     public AIRecommendationDTO(Long userId, String title, String description,
                                Double potentialSavings, Double confidenceScore) {
@@ -109,7 +107,6 @@ public class AIRecommendationDTO {
      * @param description descripción de la recomendación
      * @param category categoría asociada al patrón de gasto
      * @param potentialSavings ahorro potencial estimado
-     * @return instancia de {@link AIRecommendationDTO} tipificada como SPENDING_PATTERN
      */
     public AIRecommendationDTO(Long userId, String title, String description,
                                String category, Double potentialSavings) {
@@ -126,7 +123,6 @@ public class AIRecommendationDTO {
      * @param title título de la recomendación
      * @param description descripción de la recomendación
      * @param actionText texto de acción asociado
-     * @return instancia de {@link AIRecommendationDTO} para acciones de configuración
      */
     public AIRecommendationDTO(Long userId, AIRecommendation.RecommendationType recommendationType,
                                String title, String description, String actionText) {
@@ -142,7 +138,6 @@ public class AIRecommendationDTO {
      *
      * @param id identificador de la recomendación
      * @param isApplied indicador que señala si la recomendación ya fue aplicada
-     * @return instancia de {@link AIRecommendationDTO} con estado de aplicación actualizado
      */
     public AIRecommendationDTO(Long id, Boolean isApplied) {
         this.id = id;
@@ -158,7 +153,6 @@ public class AIRecommendationDTO {
      *
      * @param id identificador de la recomendación
      * @param status nuevo estado que se asignará a la recomendación
-     * @return instancia de {@link AIRecommendationDTO} con el estado actualizado
      */
     public AIRecommendationDTO(Long id, AIRecommendation.RecommendationStatus status) {
         this.id = id;

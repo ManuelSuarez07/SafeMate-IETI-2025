@@ -54,8 +54,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param request petición HTTP entrante que puede contener el encabezado Authorization con el token JWT
      * @param response respuesta HTTP asociada a la petición
      * @param filterChain cadena de filtros a la que delegar la petición después del procesamiento
-     * @return void — el método no devuelve valor; tiene efectos secundarios sobre el {@link SecurityContextHolder}
-     *         y delega la ejecución a la siguiente entrada de la {@code filterChain}
      * @throws ServletException si ocurre un error de tipo servlet durante el filtrado
      * @throws IOException si ocurre un error de E/S al procesar la petición/respuesta
      */

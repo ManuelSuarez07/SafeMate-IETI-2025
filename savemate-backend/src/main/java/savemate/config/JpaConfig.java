@@ -4,18 +4,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@Configuration
-@EnableJpaAuditing
-@EnableJpaRepositories(basePackages = "savemate.repository")
-public class JpaConfig {
-
-}// java
-package savemate.config;
-
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-
 /**
  * Clase de configuración de Spring responsable de habilitar las capacidades de
  * JPA en la aplicación.
