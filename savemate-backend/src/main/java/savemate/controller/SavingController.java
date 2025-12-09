@@ -38,12 +38,10 @@ public class SavingController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
-    // --- ESTE ES EL MÉTODO QUE DEBES VERIFICAR ---
     @PutMapping("/{id}/progress")
     public ResponseEntity<SavingDTO> updateSavingGoalProgress(
             @PathVariable Long id,
-            @RequestBody Map<String, Double> payload) { // <--- DEBE DECIR @RequestBody Map...
+            @RequestBody Map<String, Double> payload) {
 
         Double amount = payload.get("amount");
 
@@ -61,8 +59,6 @@ public class SavingController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    // ---------------------------------------------
-
     @PutMapping("/{id}/status")
     public ResponseEntity<SavingDTO> updateSavingGoalStatus(
             @PathVariable Long id,

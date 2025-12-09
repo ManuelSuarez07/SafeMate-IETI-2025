@@ -119,11 +119,10 @@ public class NotificationParserUtils {
         if (matcher.find()) {
             String amountStr = matcher.group(1);
             if (amountStr == null) {
-                amountStr = matcher.group(2); // Para patrones alternativos
+                amountStr = matcher.group(2);
             }
             
             try {
-                // Limpiar el string y convertir
                 amountStr = amountStr.replace(",", "").replace("$", "").trim();
                 return Double.parseDouble(amountStr);
             } catch (NumberFormatException e) {
@@ -152,8 +151,7 @@ public class NotificationParserUtils {
                 return merchant.trim();
             }
         }
-        
-        // Intentar patrones alternativos
+
         String[] alternativePatterns = {
             "compra en ([^.]+)",
             "pago en ([^.]+)",
@@ -209,7 +207,7 @@ public class NotificationParserUtils {
         // Extraer tipo de tarjeta
         extractCardInfo(text, result);
         
-        // Extraer número de teléfono (para apps de pago)
+        // Extraer número de teléfono
         extractPhoneInfo(text, result);
         
         // Detectar si es recarga o retiro
@@ -233,7 +231,6 @@ public class NotificationParserUtils {
                 try {
                     String dateStr = matcher.group(0);
                     result.put("dateString", dateStr);
-                    // Aquí se podría parsear a LocalDateTime si se necesita
                     break;
                 } catch (Exception e) {
                     log.debug("No se pudo parsear fecha: {}", matcher.group(0));
@@ -315,7 +312,7 @@ public class NotificationParserUtils {
             }
         }
         
-        // Si no hay palabras clave claras, asumir que es un gasto (más común)
+        // Si no hay palabras clave claras, asumir que es un gasto
         return "EXPENSE";
     }
     

@@ -62,7 +62,7 @@ public class TransactionService {
         return convertToDTO(savedTransaction);
     }
 
-    // --- NUEVO MÉTODO PARA RETIROS ---
+    // MÉTODO PARA RETIROS
     @Transactional
     public TransactionDTO createWithdrawal(Long userId, Double amount) {
         log.info("Procesando retiro de ${} para usuario ID: {}", amount, userId);
@@ -83,13 +83,9 @@ public class TransactionService {
         t.setTransactionType(Transaction.TransactionType.WITHDRAWAL);
         t.setStatus(Transaction.TransactionStatus.COMPLETED);
 
-        // 3. IMPORTANTE: El savingAmount es negativo para reflejar la resta en reportes si se desea,
-        // o simplemente se maneja la resta en el saldo del usuario.
-        // Para consistencia con updateTotalSaved que SUMA, pasaremos el monto negativo.
-
         Transaction saved = transactionRepository.save(t);
 
-        // 4. Restar del saldo del usuario (Pasamos monto negativo)
+        // 3. Restar del saldo del usuario
         userService.updateTotalSaved(userId, -amount);
 
         log.info("Retiro exitoso. Nuevo saldo: {}", user.getTotalSaved() - amount);
@@ -101,7 +97,6 @@ public class TransactionService {
     public TransactionDTO processTransactionFromNotification(Long userId, Double amount, String description,
                                                              String merchantName, String notificationSource,
                                                              String bankReference) {
-        // ... (código existente igual) ...
         log.info("Procesando transacción desde notificación para usuario ID: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -126,8 +121,6 @@ public class TransactionService {
         }
         return convertToDTO(savedTransaction);
     }
-
-    // ... (resto de métodos privados y createSavingDeposit se mantienen igual) ...
     private void calculateAndApplySaving(Transaction transaction, User user) {
         Double savingAmount = 0.0;
         Double roundedAmount = 0.0;

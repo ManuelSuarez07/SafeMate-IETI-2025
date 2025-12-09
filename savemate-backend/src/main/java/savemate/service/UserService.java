@@ -43,14 +43,14 @@ public class UserService {
         user.setEmail(userDTO.getEmail());
         user.setUsername(userDTO.getUsername());
 
-        // ✅ Encriptar contraseña correctamente
+        // Encriptar contraseña
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setPhoneNumber(userDTO.getPhoneNumber());
 
-        // Configuraciones de ahorro (si no vienen, usa las del modelo User)
+        // Configuraciones de ahorro
         if (userDTO.getSavingType() != null)
             user.setSavingType(userDTO.getSavingType());
 
@@ -105,7 +105,7 @@ public class UserService {
         return convertToDTO(updatedUser);
     }
 
-    // Sobrecarga 1: Usando DTO (útil para llamadas internas o futuras)
+    // Sobrecarga 1: Usando DTO
     public UserDTO updateSavingConfiguration(Long id, UserDTO configDTO) {
         log.info("Actualizando configuración de ahorro para usuario ID: {}", id);
 
@@ -148,7 +148,7 @@ public class UserService {
         return convertToDTO(updatedUser);
     }
 
-    // Sobrecarga 2: Usando Map (usada por el controlador actual para manejar JSON parcial)
+    // Sobrecarga 2: Usando Map
     public UserDTO updateSavingConfiguration(Long userId, Map<String, Object> updates) {
         log.info("Actualizando configuración de ahorro para usuario ID: {}", userId);
 
@@ -198,7 +198,7 @@ public class UserService {
         return convertToDTO(updatedUser);
     }
 
-    // ✅ Método unificado y seguro para actualizar el total ahorrado
+    // Método para actualizar el total ahorrado
     public void updateTotalSaved(Long userId, Double amount) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));

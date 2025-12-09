@@ -33,8 +33,6 @@ public class AIService {
     private final AIRecommendationRepository recommendationRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
-
-    // Instancia local de RestTemplate y ObjectMapper para llamadas a API y parseo JSON
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -44,9 +42,6 @@ public class AIService {
     @Value("${gemini.api.url}")
     private String geminiApiUrl;
 
-    /**
-     * Crea una recomendación manualmente (si es necesario).
-     */
     @Transactional
     public AIRecommendationDTO createRecommendation(AIRecommendationDTO recommendationDTO) {
         log.info("Creando recomendación manual para usuario ID: {}", recommendationDTO.getUserId());
@@ -75,10 +70,6 @@ public class AIService {
         return convertToDTO(savedRecommendation);
     }
 
-    /**
-     * MÉTODO PRINCIPAL DE IA:
-     * Analiza transacciones reales usando Google Gemini y genera recomendaciones.
-     */
     @Transactional
     public void generateSpendingPatternRecommendations(Long userId) {
         log.info("Iniciando análisis de IA con Gemini para usuario ID: {}", userId);
@@ -135,14 +126,12 @@ public class AIService {
 
         } catch (Exception e) {
             log.error("Error al comunicarse con Gemini AI: {}", e.getMessage(), e);
-            // No lanzamos excepción para no romper el flujo del usuario, solo logueamos el error.
         }
     }
 
-    // --- Métodos de Ayuda para la IA ---
+    // Métodos de Ayuda para la IA
 
     private String formatTransactionsForPrompt(List<Transaction> transactions) {
-        // Resumir las transacciones para no enviar demasiados tokens
         // Agrupamos por categoría/comercio y sumamos montos
         Map<String, Double> summary = transactions.stream()
                 .filter(t -> t.getTransactionType() == Transaction.TransactionType.EXPENSE)
@@ -198,7 +187,7 @@ public class AIService {
     private List<AIRecommendationDTO> parseGeminiResponse(String rawResponse) {
         try {
             JsonNode root = objectMapper.readTree(rawResponse);
-            // Navegar la respuesta de Gemini: candidates[0].content.parts[0].text
+            // Navegar la respuesta de Gemini
             String text = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
 
             // Limpiar bloques de código markdown si la IA los incluyó
@@ -211,24 +200,19 @@ public class AIService {
         }
     }
 
-    // --- Métodos Legacy / Específicos (Mantenidos para compatibilidad) ---
-    // Puedes llamar a generateSpendingPatternRecommendations dentro de estos si quieres unificar todo
-
+    // --- Métodos Legacy / Específicos
     @Transactional
     public void generateSavingOptimizationRecommendations(Long userId) {
-        // Por ahora, redirigimos a la lógica principal de IA para centralizar
         generateSpendingPatternRecommendations(userId);
     }
 
     @Transactional
     public void generateGoalAdjustmentRecommendations(Long userId) {
-        // Redirigido a la lógica central
         generateSpendingPatternRecommendations(userId);
     }
 
     @Transactional
     public void generatePredictiveRecommendations(Long userId) {
-        // Redirigido a la lógica central
         generateSpendingPatternRecommendations(userId);
     }
 
@@ -254,16 +238,13 @@ public class AIService {
         log.info("Limpiando recomendaciones expiradas");
         LocalDateTime now = LocalDateTime.now();
 
-        // Marcar como expiradas
-        List<AIRecommendation> pending = recommendationRepository.findAll(); // Idealmente filtrar por status PENDING en query
+        List<AIRecommendation> pending = recommendationRepository.findAll();
         for (AIRecommendation rec : pending) {
             if (rec.isExpired() && rec.getStatus() == AIRecommendation.RecommendationStatus.PENDING) {
                 rec.setStatus(AIRecommendation.RecommendationStatus.EXPIRED);
                 recommendationRepository.save(rec);
             }
         }
-        // Borrar muy antiguas
-        // Nota: Asegúrate de que deleteExpiredRecommendations esté implementado en el Repo o usa deleteAll
     }
 
     @Transactional(readOnly = true)

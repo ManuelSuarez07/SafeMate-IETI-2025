@@ -22,7 +22,7 @@ public class SavingService {
 
     private final SavingRepository savingRepository;
     private final UserRepository userRepository;
-    private final UserService userService; // Necesario para actualizar el total global
+    private final UserService userService;
 
     @Transactional
     public SavingDTO createSavingGoal(SavingDTO savingDTO) {
@@ -66,8 +66,6 @@ public class SavingService {
         }
 
         SavingGoal updatedGoal = savingRepository.save(savingGoal);
-
-        // --- CORRECCIÓN: Sumar este aporte manual también al Total Ahorrado Global del Usuario ---
         userService.updateTotalSaved(savingGoal.getUser().getId(), additionalAmount);
 
         return convertToDTO(updatedGoal);

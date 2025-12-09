@@ -1,76 +1,111 @@
-# 💰 SaveMate – Tu asistente de ahorro inteligente
+# 💰 SaveMate – Tu asistente de ahorro inteligente (V3.0 - MVP)
 
-SaveMate es una app móvil (Android/iOS) que transforma los gastos diarios pequeños (☕ cafés, 🍫 snacks, 🚌 transporte) en ahorro automático mediante redondeo o porcentaje configurable.
+SaveMate es una app móvil (Android/iOS) que transforma los gastos diarios pequeños (☕ cafés, 🍫 snacks, 🚌 transporte) en **ahorro automático** mediante reglas configurables de **redondeo** o **porcentaje**.
 
-La app detecta las transacciones a partir de notificaciones y SMS bancarios, procesa el redondeo o porcentaje definido y realiza un cobro automático a la cuenta de origen para apartar el ahorro en una alcancía digital dentro de SaveMate.
-
-Además, incorpora IA generativa que predice gastos probables y sugiere configuraciones óptimas para que el usuario alcance sus metas más rápido.
+En esta versión **MVP V3.0**, la solución está totalmente desplegada en **Google Cloud Platform (GCP)**, cuenta con autenticación segura mediante **Firebase**, e incorpora **IA generativa basada en Gemini AI**, encargada de predecir gastos probables y sugerir configuraciones óptimas para que el usuario alcance sus metas de ahorro más rápido.
 
 ---
 
 ## 🔎 Problema identificado
 
-❌ Los usuarios no logran ahorrar porque no llevan control de los gastos pequeños.  
-❌ El dinero “desaparece” al final del mes sin claridad en qué se gastó.  
-❌ Ahorrar manualmente requiere disciplina y constancia, algo difícil de mantener.
+- ❌ Los usuarios no logran ahorrar porque no controlan los gastos pequeños.
+- ❌ El dinero “desaparece” sin claridad en qué se gastó.
+- ❌ Ahorrar manualmente exige disciplina difícil de mantener.
 
 ---
 
 ## 💡 Propuesta de valor
 
-- 💵 Ahorro automático inteligente, ligado directamente al consumo real ⚡ (MVP)
-- 🎯 Metas personalizadas ⚡ (MVP)
-- 🤖 IA predictiva y generativa para anticipar gastos y recomendar ajustes ⚡ (MVP)
-- 👥 Metas colaborativas (futuro)
-- 🎮 Gamificación y logros (futuro)
-- 📚 Educación financiera ligera (futuro)
+### 🟩 Funcionalidades incluidas en MVP V3.0
+
+- 💵 **Ahorro automático inteligente** basado en reglas configurables.
+- ☁️ **Infraestructura Cloud:** Backend + BD alojados en GCP Compute Engine.
+- 🔐 **Seguridad avanzada:** Autenticación con Firebase Auth.
+- 🎯 **Metas personalizadas de ahorro.**
+- 🤖 **IA predictiva y generativa**: anticipa gastos y recomienda ajustes.
+- 📊 **Dashboard con ahorro acumulado y desglose de gastos.**
+
+### 🟧 Futuro (post-MVP)
+
+- 👥 Metas colaborativas.
+- 🎮 Gamificación y sistema de logros.
+- 📚 Educación financiera ligera dentro de la app.
 
 ---
 
-## ⚙️ Mecánica de funcionamiento
+## ⚙️ Mecánica de funcionamiento (MVP V3.0)
 
-- **Detección de transacción** ⚡ (MVP)  
-- **Cálculo del ahorro** ⚡ (MVP)  
-- **Cobro automático** ⚡ (MVP)
-- **Escenarios de saldo insuficiente** ⚡ (MVP)
-  - Opción A: No se ahorra  
-  - Opción B: Se registra como pendiente  
-  - Opción C: Respeta saldo mínimo seguro
+### 1️⃣ Registro y autenticación segura
+Implementado con **Firebase Authentication**.
 
-- **Visualización de ahorro y gastos** ⚡ (MVP)  
-- **IA predictiva y generativa** ⚡ (MVP)
+### 2️⃣ Gestión de transacciones
+Registro manual de movimientos financieros.
+
+### 3️⃣ Cálculo del ahorro
+Basado en dos métodos:
+- 🔸 Redondeo
+- 🔸 Porcentaje del gasto
+
+### 4️⃣ Simulación de cobro automático (MVP)
+
+Escenarios cuando el saldo es insuficiente:
+
+- **Opción A:** No se ahorra.
+- **Opción B:** Se registra como “pendiente”.
+- **Opción C:** Respeta “saldo mínimo seguro”.
+
+### 5️⃣ Visualización del ahorro
+Dashboard en tiempo real con:
+
+- Ahorro acumulado
+- Gastos por categoría
+- Tendencias del mes
+
+### 6️⃣ IA predictiva y generativa
+Sugiere:
+
+- Montos óptimos de ahorro
+- Ajustes de reglas
+- Riesgo de incumplimiento de metas
 
 ---
 
 ## 📌 Ejemplo práctico de redondeo
 
-- **Pago realizado:** $15.200  
-- **Redondeo al múltiplo superior:** $16.000  
-- **Ahorro generado:** $800  
+- Pago realizado: **$15.200**
+- Redondeo al múltiplo superior: **$16.000**
+- Ahorro generado: **$800**
 
 ---
 
-## 💰 Modelo de monetización
+## 💰 Modelo de monetización (MVP)
 
-- Comisión del **2.5% del total ahorrado al final de cada mes** ⚡ (MVP)
+- **Comisión del 2.5%** del total ahorrado al finalizar el mes.
 
-**Ejemplo:** Si un usuario ahorra $200.000 → SaveMate cobra $5.000
+Ejemplo:  
+Si un usuario ahorra **$200.000 → SaveMate cobra $5.000**
 
 ---
 
-## 🆕 Funcionalidades destacadas
+## 🆕 Estado de funcionalidades
 
-### ⚡ MVP – Primera versión
-- Ahorro automático (redondeo o porcentaje)
-- Manejo de saldo insuficiente
-- IA predictiva y generativa
-- Visualización de gastos y ahorro acumulado
-- Monetización por comisión mensual
+### ⚡ **MVP – Versión 3.0 (Actual)**
 
-### 🚀 Futuras mejoras
-- 🎮 Recompensas y logros
-- 👥 Metas colaborativas
-- 📚 Educación financiera automatizada
+- ✔️ Backend y Base de Datos en producción (GCP).
+- ✔️ Autenticación con Firebase totalmente integrada.
+- ✔️ Algoritmos de ahorro funcionales (redondeo/porcentaje).
+- ✔️ IA generativa y predictiva activada.
+- ✔️ APK móvil funcional conectada al backend.
+- ✔️ Lógica de monetización implementada.
+
+---
+
+## 🚀 Futuras mejoras (V4.0 y posterior)
+
+- 📨 **Lectura automática de SMS/Notificaciones** para detectar gastos reales en tiempo real.
+- 🎮 **Recompensas, logros y niveles** (gamificación).
+- 👥 **Metas colaborativas** entre usuarios.
+- 📚 **Educación financiera automatizada** dentro de la app.
 
 ---
 
@@ -87,15 +122,14 @@ Además, incorpora IA generativa que predice gastos probables y sugiere configur
 src/main/java/savemate/
 │
 ├── config/                  
+│   ├── FirebaseConfig.java ✨            # Configuración de conexión a Firebase SDK
+│   ├── FirebaseTokenFilter.java ✨       # Filtro de seguridad para validar tokens de Firebase
 │   ├── SecurityConfig.java ⚡            # Configuración de seguridad (WebSecurity)
-│   ├── JwtAuthenticationFilter.java ⚡   # Filtro para validar tokens JWT
-│   ├── JwtService.java ⚡                # Servicio de generación/validación de JWT
-│   ├── CustomUserDetailsService.java ⚡  # Carga de usuarios para Spring Security
 │   ├── WebConfig.java ⚡                 # Configuración CORS y MVC
 │   └── JpaConfig.java ⚡                 # Configuración JPA/Hibernate
 │
 ├── controller/              
-│   ├── AuthController.java ⚡            # Login y Registro (JWT)
+│   ├── AuthController.java ⚡            # Endpoints de autenticación (Firebase Token Verify)
 │   ├── UserController.java ⚡            # Gestión de perfil de usuario
 │   ├── TransactionController.java ⚡     # Gestión de transacciones
 │   ├── SavingController.java ⚡          # Gestión de metas de ahorro
@@ -181,30 +215,50 @@ lib/
 
 ```mermaid
 flowchart TD
-    A[Compra detectada por notificación/SMS] --> B[App móvil procesa notificación]
-    B --> C[App envía transacción al backend]
-    C --> D[Backend calcula ahorro y registra en BD]
-    D --> E[Cobro automático a cuenta vinculada]
-    E --> F[Ahorro registrado en SaveMate]
-    F --> G[Usuario visualiza en la app: ahorro + predicciones IA]
+    %% ==== ESTILOS ====
+    classDef primary fill:#BB86FC,stroke:#4A148C,color:#000,font-weight:bold;
+    classDef secondary fill:#9575CD,stroke:#311B92,color:#fff;
+    classDef node fill:#AED6F1,stroke:#1B4F72,color:#000;
+    classDef endnode fill:#7E57C2,stroke:#4A148C,color:#fff,font-weight:bold;
+    %% ==== FLUJO ====
+    A[Acción del usuario en la aplicación]:::primary --> B{¿Sesión autenticada?}:::node
+    B -- No --> C[Pantalla de login y registro / Firebase Auth]:::secondary
+    C --> D[Token seguro generado por Firebase]:::node
+    B -- Sí --> D
+    D --> E[Solicitud enviada al Backend / Token + Payload]:::primary
+    E --> F[Validación del token Firebase Admin SDK]:::node
+    F --> G[Procesamiento de reglas de ahorro / Modelo de IA Gemini]:::primary
+    G --> H[Operaciones con MySQL / Google Cloud Platform]:::secondary
+    H --> I[Respuesta enviada a la App]:::endnode
 ```
+
 
 ---
 
-# 🛠️ Tecnologías utilizadas
+## 🛠️ Tecnologías Utilizadas
 
-## Backend
-- ☕ **Java 17**
-- 🌱 **Spring Boot 3**
-- 🗂️ **Spring Data JPA**
-- 🔐 **Spring Security + JWT**
-- 🛢️ **MySQL / H2**
+---
 
-## Móvil
-- 📱 **Flutter**
-- 🔌 **Dio / HTTP**
-- 💾 **SharedPreferences / Secure Storage**
-- 📨 **Telephony Plugin**
+### ☁️ Infraestructura & Cloud
+- **Google Cloud Platform (GCP)** – Hosting de servicios y base de datos.
+- **Compute Engine** – Instancias virtuales para el despliegue del backend y base de datos.
+- **Firebase Authentication** – Gestión de identidades y autenticación segura.
+
+---
+
+### 🔙 Backend
+- **Java 17**
+- **Spring Boot 3**
+- **Spring Data JPA**
+- **Spring Security** + Firebase Admin SDK
+- **MySQL** (GCP)
+
+---
+
+### 📱 Móvil
+- **Flutter**
+- **Dio / HTTP Client**
+- **Firebase Auth Plugin**
 
 ---
 
@@ -234,8 +288,8 @@ flutter run
 # 📡 Endpoints principales
 
 ## 🔐 Autenticación
-- **POST /auth/register** → Registrar usuario  
-- **POST /auth/login** → Obtener token  
+- **POST /auth/register** → Registrar usuario
+- **POST /auth/login** → Obtener token
 
 ## 👥 Usuarios
 - **GET /api/users/me**
@@ -254,7 +308,8 @@ flutter run
 
 ---
 
-# 👨‍💻 Equipo
-- **Manuel Suárez**
-- **Yeltzyn Sierra**
-- **Cristian Zeballos**
+## 👨‍💻 Equipo
+
+- **Manuel Suárez** — [GitHub: ManuelSuarez07](https://github.com/ManuelSuarez07)
+- **Yeltzyn Sierra** — [GitHub: yeltzyns](https://github.com/yeltzyns)
+- **Cristian Zeballos** 

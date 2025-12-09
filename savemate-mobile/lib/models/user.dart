@@ -42,21 +42,18 @@ class User {
     this.updatedAt,
   });
 
-  // GENERADO AUTOMÁTICAMENTE (Requiere build_runner)
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
-  // MANUAL: Para asegurar compatibilidad total con Spring Boot UserDTO
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
       'username': username,
       'email': email,
-      'firstName': firstName,      // Clave exacta para Java
-      'lastName': lastName,        // Clave exacta para Java
+      'firstName': firstName,
+      'lastName': lastName,
       'phoneNumber': phoneNumber,
       'bankAccount': bankAccount,
       'bankName': bankName,
-      // Enums a String MAYÚSCULAS
       'savingType': savingType == SavingType.rounding ? 'ROUNDING' : 'PERCENTAGE',
       'roundingMultiple': roundingMultiple,
       'savingPercentage': savingPercentage,

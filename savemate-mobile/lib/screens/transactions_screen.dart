@@ -14,7 +14,6 @@ class TransactionsScreen extends StatefulWidget {
   State<TransactionsScreen> createState() => TransactionsScreenState();
 }
 
-// 1. Añadimos AutomaticKeepAliveClientMixin para mantener el estado
 class TransactionsScreenState extends State<TransactionsScreen>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
 
@@ -27,7 +26,6 @@ class TransactionsScreenState extends State<TransactionsScreen>
   bool _isLoading = true;
   String _selectedFilter = 'Todas';
 
-  // 2. Requerido por el Mixin
   @override
   bool get wantKeepAlive => true;
 
@@ -74,7 +72,6 @@ class TransactionsScreenState extends State<TransactionsScreen>
           });
         }
       } else {
-        // 3. IMPORTANTE: Si no hay ID, detener la carga de todas formas
         print('Advertencia: Usuario sin ID al cargar transacciones');
         if (mounted) {
           setState(() {
@@ -107,7 +104,7 @@ class TransactionsScreenState extends State<TransactionsScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // 4. Requerido por el Mixin
+    super.build(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -644,7 +641,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
         await apiService.createTransaction(newTransaction);
 
         if (mounted) {
-          Navigator.of(context).pop(true); // Retorna true para indicar éxito
+          Navigator.of(context).pop(true);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Transacción guardada exitosamente'),
@@ -764,7 +761,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Campo de Comercio (Opcional, solo para gastos)
+              // Campo de Comercio
               if (_selectedType == TransactionType.expense) ...[
                 TextFormField(
                   controller: _merchantController,

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth; // Alias para evitar conflicto con tu modelo User
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user.dart';
 import 'api_service.dart';
@@ -18,7 +18,6 @@ class AuthService with ChangeNotifier {
   String? _errorMessage;
 
   AuthService(this._prefs, this._apiService) {
-    // CORRECCIÓN CRÍTICA: Usamos Future.microtask para evitar errores de construcción
     Future.microtask(() => _loadUserFromPrefs());
   }
 
@@ -26,11 +25,10 @@ class AuthService with ChangeNotifier {
   User? get user => _user;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  // Ahora la autenticación depende de que tengamos usuario local y sesión válida
   bool get isLoggedIn => _user != null && (_apiService.isAuthenticated || _firebaseAuth.currentUser != null);
 
   // --- LOGIN CON FIREBASE ---
-// --- LOGIN CORREGIDO ---
+// --- LOGIN ---
   Future<bool> login(String email, String password) async {
     _setLoading(true);
     _clearError();
@@ -59,8 +57,6 @@ class AuthService with ChangeNotifier {
         }
       } catch (e) {
         _logger.w("Login en backend falló, posible desincronización: $e");
-        // Si falla (ej: usuario creado en Firebase manual pero no en BD),
-        // lanzamos error para no dejar pasar usuarios "fantasmas" sin ID.
         throw Exception("Error de sincronización con el servidor. Contacte soporte.");
       }
 
@@ -103,74 +99,59 @@ class AuthService with ChangeNotifier {
     }
   }
 
-// --- LOGIN CON GOOGLE (CORREGIDO PARA VERSIÓN 7.x) ---
+// --- LOGIN CON GOOGLE ---
   Future<bool> loginWithGoogle() async {
     _setLoading(true);
     _clearError();
 
     try {
-      // 1. CAMBIO IMPORTANTE: Usar la instancia singleton, no el constructor
       final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-
-      // 2. CAMBIO IMPORTANTE: Usar 'authenticate()' en lugar de 'signIn()'
-      // Esto inicia el flujo interactivo de selección de cuenta
       final GoogleSignInAccount? googleUser = await googleSignIn.authenticate();
 
       if (googleUser == null) {
-        _setLoading(false); // El usuario canceló el inicio de sesión
+        _setLoading(false);
         return false;
       }
 
-      // 3. Obtener credenciales de autenticación (tokens)
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      // 4. CAMBIO IMPORTANTE: Solo enviamos el idToken.
-      // El accessToken ya no es necesario para Firebase en este flujo y la v7 lo eliminó.
       final firebase_auth.AuthCredential credential = firebase_auth.GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
-        accessToken: null, // Pasamos null explícitamente ya que no se requiere
+        accessToken: null,
       );
 
-      // 5. Iniciar sesión en Firebase con la credencial de Google
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
       final firebaseUser = userCredential.user;
       final String? token = await firebaseUser?.getIdToken();
 
-      // Validación crítica para asegurar que tenemos sesión válida
       if (token == null || firebaseUser == null) {
         throw Exception("Error al obtener token de Google/Firebase");
       }
 
-      // 6. SINCRONIZACIÓN CON BACKEND MYSQL (Tu lógica personalizada)
-      // Usamos el UID de Firebase como contraseña segura para la sincronización
       final String syncPassword = "Google_Auto_${firebaseUser.uid}";
 
       User? mysqlUser;
 
       try {
-        // A) Intentamos LOGUEAR en el backend (por si el usuario ya existe en MySQL)
-        _apiService.setToken(token); // Configuramos el token para la petición
+        _apiService.setToken(token);
 
-        // ¡Importante! Usamos '!' porque ya validamos arriba que el email existe
         final loginResponse = await _apiService.login(firebaseUser.email!, syncPassword);
 
         if (loginResponse['user'] != null) {
           mysqlUser = User.fromJson(loginResponse['user']);
         }
       } catch (e) {
-        // B) Si falla el login, intentamos REGISTRAR en el backend
         _logger.i("Usuario nuevo de Google, registrando en MySQL...");
 
         final newUser = User(
           username: firebaseUser.email!.split('@')[0],
-          email: firebaseUser.email!, // Usamos '!' con seguridad
+          email: firebaseUser.email!,
           firstName: firebaseUser.displayName?.split(' ').first ?? 'Google',
           lastName: firebaseUser.displayName?.split(' ').last ?? 'User',
           phoneNumber: firebaseUser.phoneNumber ?? '',
         );
 
         try {
-          // Registramos el usuario en MySQL usando el UID como password
           final createdUser = await _apiService.createUser(newUser, syncPassword);
           mysqlUser = createdUser;
         } catch (regError) {
@@ -179,11 +160,9 @@ class AuthService with ChangeNotifier {
         }
       }
 
-      // 7. Finalizar sesión y guardar datos
-      // Restauramos el token de Firebase (por si el login del backend lo cambió)
       _apiService.setToken(token);
       await _prefs.setString('access_token', token);
-      await _prefs.setString('refresh_token', ''); // Firebase maneja el refresh internamente
+      await _prefs.setString('refresh_token', '');
 
       if (mysqlUser != null) {
         _user = mysqlUser;
@@ -194,7 +173,6 @@ class AuthService with ChangeNotifier {
       return true;
 
     } catch (e) {
-      // Manejo general de errores
       _setError(e.toString());
       _setLoading(false);
       return false;
@@ -228,7 +206,6 @@ class AuthService with ChangeNotifier {
         _user = createdUser; // Usamos el usuario que devuelve el backend con el ID correcto
       } catch (backendError) {
         _logger.w('Usuario creado en Firebase pero falló en Backend: $backendError');
-        // Fallback: Usar datos locales si el backend falla momentáneamente
         _user = user;
       }
 
@@ -281,7 +258,7 @@ class AuthService with ChangeNotifier {
     }
   }
 
-  // --- TOKEN REFRESH CORREGIDO ---
+  // --- TOKEN REFRESH ---
   Future<bool> refreshToken() async {
     try {
       final currentUser = _firebaseAuth.currentUser;
@@ -290,17 +267,15 @@ class AuthService with ChangeNotifier {
         return false;
       }
 
-      // forceRefresh: true fuerza a pedir un nuevo token
+      // forceRefresh
       final token = await currentUser.getIdToken(true);
 
-      // CORRECCIÓN: Verificamos si el token es nulo antes de usarlo
       if (token == null) {
         _logger.w('No se pudo refrescar el token (fue nulo)');
         await logout();
         return false;
       }
 
-      // Ahora 'token' ya es tratado como String seguro
       await _prefs.setString('access_token', token);
       _apiService.setToken(token);
 

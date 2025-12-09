@@ -18,7 +18,7 @@ public class UserDTO {
 
     private Long id;
 
-    @NotBlank(message = "El nombre de usuario es obligatorio") // <--- AGREGADO: Evita tu error 400
+    @NotBlank(message = "El nombre de usuario es obligatorio")
     private String username;
 
     @NotBlank(message = "El email es obligatorio")
@@ -53,10 +53,6 @@ public class UserDTO {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    // --- TUS CONSTRUCTORES MANUALES ---
-    // Están bien, puedes dejarlos si los usas en otra parte del código.
-    // Si no los usas explícitamente, Lombok ya te da el NoArgs y AllArgs.
 
     public UserDTO(String email, String firstName, String lastName, String phoneNumber) {
         this.email = email;

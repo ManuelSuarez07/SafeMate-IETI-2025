@@ -109,7 +109,7 @@ public class RoundingUtils {
      */
     public Integer findOptimalRoundingMultiple(Double amount) {
         if (amount == null || amount <= 0) {
-            return 1000; // Valor por defecto
+            return 1000;
         }
         
         if (amount < 5000) {

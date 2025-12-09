@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 import '../models/user.dart';
 import 'login_screen.dart';
-import 'bank_account_screen.dart'; // Asegúrate de tener este archivo creado
+import 'bank_account_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -34,7 +34,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Cargar datos después de que se construya la interfaz
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserData();
     });
@@ -81,7 +80,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
         phoneNumber: _phoneController.text,
-        // Mantener el resto de datos igual
         bankAccount: currentUser.bankAccount,
         bankName: currentUser.bankName,
         savingType: currentUser.savingType,
@@ -464,7 +462,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // [FIX] Se corrigió para que navegue a la pantalla en lugar de abrir diálogo
   Widget _buildBankAccountCard(User user) {
     bool hasAccount = user.bankAccount != null && user.bankAccount!.isNotEmpty;
 
@@ -473,12 +470,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () async {
-          // Navegar a la nueva pantalla y recargar datos al volver
           await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const BankAccountScreen()),
           );
-          _loadUserData(); // Recargar para mostrar los cambios
+          _loadUserData();
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(

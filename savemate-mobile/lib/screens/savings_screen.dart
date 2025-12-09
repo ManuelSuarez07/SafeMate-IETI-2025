@@ -511,7 +511,7 @@ class SavingsScreenState extends State<SavingsScreen> {
       builder: (context) => const AddSavingGoalDialog(),
     ).then((value) {
       if (value == true) {
-        _loadGoals(); // Recargar si se creó exitosamente
+        _loadGoals();
       }
     });
   }
@@ -558,7 +558,7 @@ class SavingsScreenState extends State<SavingsScreen> {
             onPressed: () async {
               final amount = double.tryParse(controller.text.replaceAll(',', '.'));
               if (amount != null && amount > 0) {
-                Navigator.of(context).pop(); // Cerrar diálogo primero
+                Navigator.of(context).pop();
                 await _addAmountToGoal(goal, amount);
               }
             },
@@ -679,9 +679,7 @@ class SavingsScreenState extends State<SavingsScreen> {
   }
 }
 
-// ----------------------------------------------
 // WIDGETS AUXILIARES
-// ----------------------------------------------
 
 class AddSavingGoalDialog extends StatefulWidget {
   const AddSavingGoalDialog({Key? key}) : super(key: key);
@@ -698,7 +696,7 @@ class _AddSavingGoalDialogState extends State<AddSavingGoalDialog> {
 
   DateTime? _targetDate;
   // Variable para guardar la prioridad seleccionada (1 = Baja, 3 = Alta, etc.)
-  int _selectedPriority = 2; // Valor por defecto: Media (2)
+  int _selectedPriority = 2;
   bool _isSaving = false;
 
   @override
@@ -756,7 +754,7 @@ class _AddSavingGoalDialogState extends State<AddSavingGoalDialog> {
           currentAmount: 0,
           targetDate: _targetDate,
           status: GoalStatus.active,
-          priorityLevel: _selectedPriority, // Usar la prioridad seleccionada
+          priorityLevel: _selectedPriority,
         );
 
         await apiService.createSavingGoal(newGoal);
@@ -827,7 +825,6 @@ class _AddSavingGoalDialogState extends State<AddSavingGoalDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              // Selector de Prioridad (Nuevo)
               DropdownButtonFormField<int>(
                 value: _selectedPriority,
                 decoration: InputDecoration(

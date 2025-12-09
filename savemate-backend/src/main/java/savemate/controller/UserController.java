@@ -35,8 +35,6 @@ public class UserController {
         }
     }
 
-    // --- MÉTODOS QUE FALTABAN PARA SOLUCIONAR EL ERROR 403/404 ---
-
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         log.info("Solicitud para obtener usuario ID: {}", id);
@@ -70,8 +68,6 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
-    // --- NUEVO ENDPOINT PARA VINCULAR CUENTA ---
     @PutMapping("/{id}/bank-account")
     public ResponseEntity<?> linkBankAccount(@PathVariable Long id, @RequestBody Map<String, String> bankData) {
         log.info("Solicitud para vincular cuenta bancaria usuario ID: {}", id);
@@ -83,7 +79,6 @@ public class UserController {
                 return ResponseEntity.badRequest().body("Faltan datos bancarios");
             }
 
-            // Llamamos al método específico que ya tienes en UserService
             UserDTO updatedUser = userService.linkBankAccount(id, bankAccount, bankName);
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {

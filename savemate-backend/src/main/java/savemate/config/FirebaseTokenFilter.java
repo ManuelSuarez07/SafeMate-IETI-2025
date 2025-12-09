@@ -19,14 +19,13 @@ import java.util.ArrayList;
 import java.util.Collections; // Usaremos Collections.emptyList()
 
 @Component
-@Slf4j // Usar el logger
+@Slf4j
 public class FirebaseTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Si ya está autenticado (por ejemplo, por el filtro JWT local), no hacer nada.
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             filterChain.doFilter(request, response);
             return;
@@ -53,13 +52,7 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // NOTA: Una vez que Firebase autentica, el contexto ya no es nulo,
-                // por lo que el JwtAuthenticationFilter (si se ejecuta después) lo ignorará.
-
             } catch (FirebaseAuthException e) {
-                // Si la validación de Firebase falla, no lanzamos excepción, solo limpiamos
-                // y dejamos que el siguiente filtro (JwtAuthenticationFilter) lo intente,
-                // o que la petición sea rechazada al final.
                 log.warn("Error al validar Token de Firebase (posible token local o expirado): {}", e.getMessage());
             }
         }

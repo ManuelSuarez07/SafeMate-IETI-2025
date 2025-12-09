@@ -74,7 +74,7 @@ public class Transaction {
         INCOME,
         SAVING,
         FEE,
-        WITHDRAWAL // <--- NUEVO TIPO AGREGADO
+        WITHDRAWAL
     }
 
     public enum TransactionStatus {

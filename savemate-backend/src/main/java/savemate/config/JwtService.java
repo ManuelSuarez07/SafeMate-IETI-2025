@@ -29,32 +29,16 @@ public class JwtService {
     private Key getSignInKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
-    
-    /**
-     * Extrae el username (email) del token
-     */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
-    
-    /**
-     * Extrae la fecha de expiración del token
-     */
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-    
-    /**
-     * Extrae un claim específico del token
-     */
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-    
-    /**
-     * Extrae todos los claims del token
-     */
     private Claims extractAllClaims(String token) {
         try {
             return Jwts.parserBuilder()
@@ -67,24 +51,13 @@ public class JwtService {
             throw new RuntimeException("Token inválido");
         }
     }
-    
-    /**
-     * Verifica si el token ha expirado
-     */
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-    
-    /**
-     * Genera un token para un usuario
-     */
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
-    
-    /**
-     * Genera un token con claims adicionales
-     */
+
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(extraClaims)
@@ -94,10 +67,7 @@ public class JwtService {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-    
-    /**
-     * Genera un token de refresco
-     */
+
     public String generateRefreshToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
@@ -106,10 +76,6 @@ public class JwtService {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-    
-    /**
-     * Verifica si un token es válido para un usuario
-     */
     public Boolean isTokenValid(String token, UserDetails userDetails) {
         try {
             final String username = extractUsername(token);
@@ -119,10 +85,7 @@ public class JwtService {
             return false;
         }
     }
-    
-    /**
-     * Verifica si un token es válido (sin verificar usuario específico)
-     */
+
     public Boolean isTokenValid(String token) {
         try {
             return !isTokenExpired(token);
@@ -131,10 +94,7 @@ public class JwtService {
             return false;
         }
     }
-    
-    /**
-     * Extrae información del usuario del token
-     */
+
     public Map<String, Object> extractUserInfo(String token) {
         try {
             Claims claims = extractAllClaims(token);
@@ -156,10 +116,7 @@ public class JwtService {
             return new HashMap<>();
         }
     }
-    
-    /**
-     * Obtiene el tiempo de expiración en milisegundos
-     */
+
     public long getJwtExpiration() {
         return jwtExpiration;
     }

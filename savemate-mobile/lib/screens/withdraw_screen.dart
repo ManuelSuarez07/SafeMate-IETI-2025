@@ -19,7 +19,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   bool _isSimulating = false;
   String _simulationStatus = '';
 
-  // Mensajes para dar sensación de retiro bancario real
   final List<String> _simulationSteps = [
     'Verificando saldo disponible...',
     'Conectando con pasarela bancaria...',
@@ -139,7 +138,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.check_circle, color: Colors.purple, size: 80), // Morado para retiros
+            const Icon(Icons.check_circle, color: Colors.purple, size: 80),
             const SizedBox(height: 16),
             Text(
               '¡Retiro Exitoso!',
@@ -169,7 +168,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
             ),
             onPressed: () {
               Navigator.pop(ctx);
-              Navigator.pop(context); // Regresar al home
+              Navigator.pop(context);
             },
             child: const Text('Finalizar'),
           ),

@@ -20,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
-  // Usamos _isLoading localmente para controlar solo los botones de esta pantalla
   bool _isLoading = false;
 
   @override
@@ -62,22 +61,19 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.red,
           ),
         );
-        // Limpia el error después de mostrarlo para futuras interacciones
         authService.clearError();
       }
     }
   }
 
-  // Lógica de inicio de sesión de Google, similar a _login()
+  // Lógica de inicio de sesión de Google
   Future<void> _loginGoogle() async {
-    // No necesitamos validación de formulario para Google
     setState(() => _isLoading = true);
 
     final authService = Provider.of<AuthService>(context, listen: false);
 
     final success = await authService.loginWithGoogle();
 
-    // Aseguramos que el estado local _isLoading se actualice al terminar
     if (mounted) {
       setState(() => _isLoading = false);
     }
@@ -103,7 +99,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Usamos el estado de carga global de AuthService para deshabilitar los botones
     final authService = Provider.of<AuthService>(context);
     final isAnyLoading = _isLoading || authService.isLoading;
 
@@ -263,7 +258,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 30), // Espacio antes del separador
+                    const SizedBox(height: 30),
 
                     // Separador
                     Row(
@@ -280,22 +275,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 20), // Espacio después del separador
+                    const SizedBox(height: 20),
 
-                    // === INICIO DE LA ADICIÓN: Botón de Google ===
+                    // Botón de Google
                     Consumer<AuthService>(
                       builder: (context, authService, child) {
                         return SizedBox(
                           width: double.infinity,
                           height: 50,
                           child: OutlinedButton.icon(
-                            // Deshabilitar si _isLoading o authService.isLoading es true
                             onPressed: isAnyLoading ? null : _loginGoogle,
 
                             icon: Image.network(
                               'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
                               height: 24,
-                              // Fallback si la imagen no carga
                               errorBuilder: (context, error, stackTrace) => const Icon(Icons.login),
                             ),
                             label: Text(
@@ -312,7 +305,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               side: const BorderSide(
-                                color: Colors.grey, // Borde gris claro para destacar
+                                color: Colors.grey,
                                 width: 1,
                               ),
                             ),
@@ -320,7 +313,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       },
                     ),
-                    // === FIN DE LA ADICIÓN ===
 
                     const SizedBox(height: 30),
 

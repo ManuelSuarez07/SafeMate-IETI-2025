@@ -96,10 +96,10 @@ public class AuthController {
                         .body(Map.of("error", "El email ya está registrado"));
             }
 
-            // 🔥 Crear el usuario (aquí ya encripta la contraseña internamente)
+            // Crear el usuario
             UserDTO createdUser = userService.createUser(userDTO);
 
-            // 🔥 Autologin después de registrar
+            // Autologin después de registrar
             UserDetails userDetails = userDetailsService.loadUserByUsername(userDTO.getEmail());
             String accessToken = jwtService.generateToken(userDetails);
             String refreshToken = jwtService.generateRefreshToken(userDetails);
@@ -119,5 +119,4 @@ public class AuthController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
-
 }

@@ -43,10 +43,10 @@ class _BankAccountScreenState extends State<BankAccountScreen> {
       if (_banks.contains(user.bankName)) {
         _selectedBank = user.bankName;
       } else {
-        _selectedBank = _banks.first; // Default o agregar lógica para 'Otro'
+        _selectedBank = _banks.first;
       }
 
-      _isEditing = false; // Modo visualización
+      _isEditing = false;
     } else {
       _selectedBank = 'Bancolombia'; // Default
     }

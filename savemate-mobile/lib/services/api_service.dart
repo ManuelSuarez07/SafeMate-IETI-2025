@@ -8,9 +8,6 @@ import '../models/saving.dart';
 import '../models/ai_recommendation.dart';
 
 class ApiService with ChangeNotifier {
-  // Asegúrate de usar la IP correcta para tu emulador/dispositivo
-  // Emulador Android: 10.0.2.2
-  // iOS / Dispositivo Físico: Tu IP local (ej: 192.168.1.X)
   static const String baseUrl = 'http://34.123.185.74:8080/api';
 
   final Dio _dio = Dio();
@@ -156,7 +153,7 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // ✅ Método para VINCULAR CUENTA BANCARIA (Prioridad 2)
+  // Metodo para vincular cuenta Bancaria
   Future<User> linkBankAccount(int userId, String bankAccount, String bankName) async {
     try {
       final response = await _dio.put('/users/$userId/bank-account', data: {
@@ -166,7 +163,6 @@ class ApiService with ChangeNotifier {
 
       final updatedUser = User.fromJson(response.data);
 
-      // Actualizar el usuario local para que la UI se refresque
       if (_currentUser?.id == userId) {
         _currentUser = updatedUser;
         notifyListeners();
@@ -191,7 +187,7 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // ✅ Método para DEPÓSITO SIMULADO (Prioridad 3)
+  // Metodo para deposito simulado
   Future<Transaction> createSavingDeposit({
     required int userId,
     required double amount,
@@ -199,14 +195,13 @@ class ApiService with ChangeNotifier {
     try {
       final response = await _dio.post(
         '/transactions/saving-deposit',
-        queryParameters: { // Usamos queryParameters porque el Controller espera @RequestParam
+        queryParameters: {
           'userId': userId,
           'amount': amount,
           'description': 'Recarga desde cuenta vinculada',
         },
       );
 
-      // Forzar actualización del usuario para reflejar el nuevo saldo en el Home
       final updatedUser = await getUserById(userId);
       setCurrentUser(updatedUser);
 
@@ -231,7 +226,6 @@ class ApiService with ChangeNotifier {
         },
       );
 
-      // Actualizamos datos del usuario para reflejar el nuevo saldo
       final updatedUser = await getUserById(userId);
       setCurrentUser(updatedUser);
 
@@ -242,7 +236,7 @@ class ApiService with ChangeNotifier {
     }
   }
 
-  // ✅ Método para PROCESAR NOTIFICACIONES/SMS (Prioridad 1)
+  // Metodo para procesar notificaciones (TODO)
   Future<Transaction> processTransactionFromNotification({
     required int userId,
     required double amount,
@@ -261,7 +255,6 @@ class ApiService with ChangeNotifier {
         if (bankReference != null) 'bankReference': bankReference,
       });
 
-      // Actualizar usuario para reflejar el ahorro automático
       final updatedUser = await getUserById(userId);
       setCurrentUser(updatedUser);
 
@@ -355,7 +348,6 @@ class ApiService with ChangeNotifier {
 
   Future<void> generateSpendingPatternRecommendations(int userId) async {
     try {
-      // Llama al endpoint específico que creamos en el backend
       await _dio.post('/ai/generate/spending-patterns/$userId');
     } on DioException catch (e) {
       _logger.e('Generate spending pattern recommendations error: ${e.response?.data}');
@@ -405,7 +397,6 @@ class ApiService with ChangeNotifier {
       case DioExceptionType.badResponse:
         if (error.response?.data is Map<String, dynamic>) {
           final data = error.response!.data as Map<String, dynamic>;
-          // Intenta extraer el mensaje de error del backend
           return data['error'] ?? data['message'] ?? 'Error del servidor';
         } else if (error.response?.data is String) {
           return error.response!.data.toString();

@@ -21,7 +21,6 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
   @override
   void initState() {
     super.initState();
-    // Usamos addPostFrameCallback para asegurar que el contexto esté listo
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadRecommendations();
     });
@@ -68,7 +67,6 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
 
       if (authService.user?.id != null) {
         // Llamada al backend para que Gemini genere nuevas recomendaciones
-        // Asumiendo que generateSpendingPatternRecommendations es el endpoint principal
         await apiService.generateSpendingPatternRecommendations(authService.user!.id!);
 
         // Recargar la lista para mostrar las nuevas
@@ -104,7 +102,7 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50], // Fondo ligeramente gris para resaltar tarjetas
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -153,7 +151,7 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
               ),
               const SizedBox(height: 12),
               ..._recommendations.map((rec) => _buildRecommendationCard(rec)).toList(),
-              const SizedBox(height: 40), // Espacio extra al final
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -176,7 +174,7 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.smart_toy_outlined, // Ícono más moderno para IA
+                Icons.smart_toy_outlined,
                 size: 60,
                 color: Colors.purple,
               ),
@@ -529,7 +527,6 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
   Future<void> _applyRecommendation(AIRecommendation recommendation) async {
     if (!mounted) return;
 
-    // Feedback táctil inmediato
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -542,7 +539,7 @@ class _AIRecommendationsScreenState extends State<AIRecommendationsScreen> {
       final apiService = Provider.of<ApiService>(context, listen: false);
       await apiService.applyRecommendation(recommendation.id!);
 
-      await _loadRecommendations(); // Recargar para ver cambios
+      await _loadRecommendations();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

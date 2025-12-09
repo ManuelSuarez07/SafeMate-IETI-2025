@@ -51,8 +51,8 @@ class _DepositScreenState extends State<DepositScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(ctx); // Cierra diálogo
-              Navigator.pop(context); // Cierra pantalla depósito
+              Navigator.pop(ctx);
+              Navigator.pop(context);
             },
             child: const Text('Cancelar'),
           ),
@@ -87,11 +87,11 @@ class _DepositScreenState extends State<DepositScreen> {
       _isSimulating = true;
     });
 
-    // 1. Simulación Visual (Pasos falsos para dar sensación de seguridad/conexión)
+    // 1. Simulación Visual
     for (final step in _simulationSteps) {
       if (!mounted) return;
       setState(() => _simulationStatus = step);
-      await Future.delayed(const Duration(milliseconds: 1500)); // 1.5 segundos por paso
+      await Future.delayed(const Duration(milliseconds: 1500));
     }
 
     // 2. Llamada Real al Backend
@@ -155,8 +155,8 @@ class _DepositScreenState extends State<DepositScreen> {
               minimumSize: const Size(double.infinity, 45),
             ),
             onPressed: () {
-              Navigator.pop(ctx); // Cerrar diálogo
-              Navigator.pop(context); // Regresar al home
+              Navigator.pop(ctx);
+              Navigator.pop(context);
             },
             child: const Text('Entendido'),
           ),

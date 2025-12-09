@@ -5,7 +5,7 @@ import 'package:logger/logger.dart';
 // import 'package:sms_reader/sms_reader.dart'; // No necesario si usas Telephony
 import 'package:flutter/material.dart';
 import 'package:telephony/telephony.dart';
-import 'api_service.dart'; // [FIX] Importar ApiService
+import 'api_service.dart';
 
 class NotificationService with ChangeNotifier {
   static final NotificationService _instance = NotificationService._internal();
@@ -16,7 +16,6 @@ class NotificationService with ChangeNotifier {
   FlutterLocalNotificationsPlugin();
   final Logger _logger = Logger();
 
-  // [FIX] Referencia al ApiService para enviar datos al backend
   ApiService? _apiService;
 
   bool _isInitialized = false;
@@ -28,7 +27,6 @@ class NotificationService with ChangeNotifier {
   bool get hasSmsPermission => _hasSmsPermission;
   bool get hasNotificationPermission => _hasNotificationPermission;
 
-  // [FIX] Método para inyectar el ApiService (Llamar esto en main.dart o tras el login)
   void setApiService(ApiService service) {
     _apiService = service;
     _logger.i('ApiService inyectado en NotificationService');
@@ -302,7 +300,6 @@ class NotificationService with ChangeNotifier {
     }
   }
 
-  // [FIX] Implementación completa de la conexión con el Backend
   Future<void> _processTransactionFromSms(Map<String, dynamic> transactionData) async {
     try {
       _logger.i('Procesando transacción desde SMS: $transactionData');

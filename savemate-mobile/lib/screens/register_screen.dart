@@ -72,7 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (success) {
       if (mounted) {
-        Navigator.of(context).pop(); // Volver al login
+        Navigator.of(context).pop();
       }
     } else {
       if (mounted) {

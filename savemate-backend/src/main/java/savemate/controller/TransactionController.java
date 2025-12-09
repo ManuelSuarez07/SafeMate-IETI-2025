@@ -37,8 +37,6 @@ public class TransactionController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
-    // --- NUEVO ENDPOINT PARA RETIROS ---
     @PostMapping("/withdraw")
     public ResponseEntity<?> withdrawFunds(
             @RequestParam Long userId,
@@ -51,11 +49,10 @@ public class TransactionController {
             return new ResponseEntity<>(transaction, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             log.error("Error procesando retiro: {}", e.getMessage());
-            // Devolvemos un mensaje claro si son fondos insuficientes
+            // Mensaje si fondos insuficientes
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @PostMapping("/from-notification")
     public ResponseEntity<TransactionDTO> processTransactionFromNotification(
             @RequestParam Long userId,
@@ -76,7 +73,6 @@ public class TransactionController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
     @PostMapping("/saving-deposit")
     public ResponseEntity<TransactionDTO> createSavingDeposit(
             @RequestParam Long userId,

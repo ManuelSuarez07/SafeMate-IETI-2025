@@ -13,7 +13,7 @@ import 'savings_screen.dart';
 import 'ai_recommendations_screen.dart';
 import 'profile_screen.dart';
 import 'deposit_screen.dart';
-import 'withdraw_screen.dart'; // ✅ [FIX] Importar pantalla de retiro
+import 'withdraw_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -290,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              // ✅ [FIX] Botón de Retirar conectado a WithdrawScreen
+
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
